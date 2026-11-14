@@ -10,44 +10,37 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
     <style>
-        body { 
-            background-image: url('https://res.cloudinary.com/dvsva8hxi/image/upload/v1794496554/f9f8fac14f5405772749bf33b55507e0_vv72wy.jpg');
-            background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat;
-            margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            color: #ffffff; min-height: 100vh; transition: background-color 0.5s ease;
-        }
+        body { background-image: url('https://res.cloudinary.com/dvsva8hxi/image/upload/v1794496554/f9f8fac14f5405772749bf33b55507e0_vv72wy.jpg'); background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #ffffff; min-height: 100vh; transition: background-color 0.5s ease; }
         body.dark-mode { background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.85)), url('https://res.cloudinary.com/dvsva8hxi/image/upload/v1794496554/f9f8fac14f5405772749bf33b55507e0_vv72wy.jpg'); }
 
         .navbar { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid rgba(255, 255, 255, 0.3); padding: 15px 0; position: sticky; top: 0; z-index: 1000; transition: all 0.5s ease; }
         body.dark-mode .navbar { background: rgba(0, 0, 0, 0.5); border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
-
         .navbar-brand { color: #ffffff !important; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        
         .search-bar { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 20px; color: #fff; padding: 8px 15px; width: 250px; transition: all 0.3s ease; }
         body.dark-mode .search-bar { background: rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.2); }
         .search-bar::placeholder { color: rgba(255, 255, 255, 0.7); }
         .search-bar:focus { background: rgba(255, 255, 255, 0.9); color: #111; outline: none; }
 
+        /* Shared Cart Styles */
         .cart-container { position: relative; display: inline-block; }
         .cart-btn { background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.4); color: white; border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.3s ease; }
         body.dark-mode .cart-btn { background: rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.2); }
         .cart-btn:hover { background: rgba(255, 255, 255, 0.4); color: white; transform: scale(1.05); }
         .cart-badge { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 50%; font-size: 0.75rem; font-weight: bold; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255,255,255,0.8); }
-
         .cart-dropdown { position: absolute; top: 55px; right: 0; width: 360px; background: rgba(30, 30, 30, 0.95); backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 20px; padding: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); opacity: 0; visibility: hidden; transform: translateY(10px); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 1001; text-align: left; }
         .cart-container:hover .cart-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
         body.dark-mode .cart-dropdown { background: rgba(10, 10, 10, 0.98); }
-
         .cart-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .cart-item-left { display: flex; align-items: center; gap: 10px; flex-grow: 1; max-width: 55%; }
         .cart-item-img { width: 45px; height: 45px; border-radius: 8px; object-fit: cover; }
         .cart-item-title { font-size: 0.85rem; font-weight: 600; margin: 0; color: white; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .cart-item-price { font-size: 0.8rem; color: #4ade80; margin: 0; font-weight: bold; }
-        
+        .cart-item-variant { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin: 0; }
         .qty-controls { display: flex; align-items: center; gap: 5px; }
         .qty-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 5px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; padding: 0; transition: 0.2s; }
         .qty-btn:hover { background: rgba(255,255,255,0.3); }
         .qty-display { width: 20px; text-align: center; font-size: 0.9rem; font-weight: bold; }
-
         .btn-remove-item { background: transparent; border: none; color: #ef4444; font-size: 1.1rem; padding: 0 5px; transition: 0.2s; }
         .btn-remove-item:hover { color: #ff8a8a; transform: scale(1.1); }
 
@@ -56,7 +49,7 @@
         .view-toggle button { background: transparent; border: none; color: rgba(255, 255, 255, 0.6); padding: 6px 12px; border-radius: 8px; transition: all 0.3s ease; font-size: 1.1rem; }
         .view-toggle button.active { background: rgba(255, 255, 255, 0.3); color: #ffffff; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 
-        .card { background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 20px; color: white; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden; height: 100%; }
+        .card { background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1)); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.4); border-radius: 20px; color: white; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden; height: 100%; cursor: pointer; }
         body.dark-mode .card { background: linear-gradient(135deg, rgba(40, 40, 40, 0.9), rgba(20, 20, 20, 0.8)); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
         .card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 40px rgba(0,0,0,0.4); border-color: rgba(255, 255, 255, 0.7); }
         body.dark-mode .card:hover { border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 15px 35px rgba(0,0,0,0.8); }
@@ -65,18 +58,6 @@
         .card-title { font-weight: 700; font-size: 1.25rem; margin-bottom: 8px; }
         .card-text { color: rgba(255, 255, 255, 0.85); font-size: 0.95rem; line-height: 1.4; }
         .price { color: #4ade80; font-weight: 800; font-size: 1.35rem; text-shadow: 0 2px 10px rgba(74, 222, 128, 0.3); margin-top: 10px; }
-
-        .btn-glass { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.4); color: white; font-weight: 600; border-radius: 12px; padding: 10px; transition: all 0.25s ease; backdrop-filter: blur(10px); font-size: 1rem; width: 100%; }
-        body.dark-mode .btn-glass { background: rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.2); }
-        .btn-glass:hover { background: rgba(255, 255, 255, 0.3); color: white; border-color: rgba(255, 255, 255, 0.8); }
-
-        .add-cart-wrapper { position: relative; width: 100%; }
-        .add-cart-dropdown { position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%) scale(0.9); background: rgba(40, 40, 40, 0.95); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 12px; padding: 8px; display: flex; gap: 8px; opacity: 0; visibility: hidden; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 10; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
-        body.dark-mode .add-cart-dropdown { background: rgba(10, 10, 10, 0.98); }
-        .add-cart-wrapper:hover .add-cart-dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) scale(1); }
-
-        .qty-opt-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: 0.2s; white-space: nowrap; }
-        .qty-opt-btn:hover { background: #4ade80; color: #111; border-color: #4ade80; transform: scale(1.05); }
 
         .card-list-view { flex-direction: row; align-items: stretch; }
         .card-list-view .card-img-top { width: 35%; height: 100%; min-height: 160px; border-bottom: none; border-right: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px 0 0 20px; }
@@ -88,22 +69,22 @@
             .card-list-view .card-body { width: 100%; }
         }
 
+        /* Shared Menu Styles */
         .menu-container, .simple-menu-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; }
         .ios-fab { width: 60px; height: 60px; border-radius: 50%; background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.3); color: white; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         body.dark-mode .ios-fab { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.2); }
         .ios-fab:hover { transform: scale(1.1); background: rgba(255, 255, 255, 0.3); }
-
         .ios-menu-options { position: absolute; bottom: 75px; right: 0; background: rgba(40, 40, 40, 0.6); backdrop-filter: blur(25px) saturate(180%); -webkit-backdrop-filter: blur(25px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 20px; padding: 10px; display: flex; flex-direction: column; gap: 5px; width: 220px; transform-origin: bottom right; transform: scale(0); opacity: 0; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
         body.dark-mode .ios-menu-options { background: rgba(20, 20, 20, 0.9); border-color: rgba(255, 255, 255, 0.2); }
         .ios-menu-options.show { transform: scale(1); opacity: 1; }
-
         .ios-menu-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; color: white; text-decoration: none; border-radius: 12px; font-weight: 600; transition: background 0.2s ease; }
         .ios-menu-item:hover { background: rgba(255, 255, 255, 0.2); color: white; }
         .ios-menu-item.disabled { opacity: 0.4; pointer-events: none; cursor: not-allowed; }
-
         .simple-dropdown { position: absolute; bottom: 60px; right: 0; background: rgba(40, 40, 40, 0.8); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 15px; padding: 10px; width: 220px; display: flex; flex-direction: column; gap: 5px; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
         body.dark-mode .simple-dropdown { background: rgba(20, 20, 20, 0.95); border-color: rgba(255, 255, 255, 0.2); }
         .simple-dropdown.show { opacity: 1; visibility: visible; bottom: 70px; }
+        .btn-glass { background: rgba(255, 255, 255, 0.15); border: 1px solid rgba(255, 255, 255, 0.4); color: white; font-weight: 600; border-radius: 12px; padding: 10px; transition: all 0.25s ease; backdrop-filter: blur(10px); font-size: 1rem; width: 100%; }
+        body.dark-mode .btn-glass { background: rgba(0, 0, 0, 0.4); border-color: rgba(255, 255, 255, 0.2); }
 
         #toast-container { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 10000; padding: 12px 24px; border-radius: 50px; display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1rem; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); }
         #toast-container.show { top: 30px; }
@@ -121,12 +102,12 @@
 
 <nav class="navbar navbar-expand-lg">
     <div class="container">
-        <a class="navbar-brand" href="#">BadStore</a>
+        <a class="navbar-brand" href="index.html">BadStore</a>
         <div class="ms-auto d-flex align-items-center gap-3">
             <input type="text" id="searchInput" class="search-bar d-none d-lg-block" placeholder="Tìm kiếm vợt..." onkeyup="handleSearch()">
             
             <div class="cart-container">
-                <button class="cart-btn">
+                <button class="cart-btn" onclick="window.location.href='checkout.html'">
                     <i class="bi bi-cart3 fs-5"></i>
                     <span class="cart-badge" id="cartCount">0</span>
                 </button>
@@ -145,7 +126,7 @@
                             <span>Tổng cộng:</span>
                             <span class="price" id="cartTotalPrice" style="font-size: 1.1rem;">0 VNĐ</span>
                         </div>
-                        <button class="btn btn-success w-100 fw-bold" onclick="showToast('Chức năng thanh toán đang phát triển!')">Thanh toán</button>
+                        <button class="btn btn-success w-100 fw-bold" onclick="window.location.href='checkout.html'">Thanh toán</button>
                     </div>
                 </div>
             </div>
@@ -166,11 +147,12 @@
     <div class="row" id="productGrid"></div>
 </div>
 
+<!-- SHARED MENU -->
 <div class="menu-container" id="iosMenuContainer">
     <div class="ios-menu-options" id="iosMenuOptions">
         <a href="index.html" class="ios-menu-item" id="navHome"><i class="bi bi-house-door-fill"></i> Trang chủ</a>
-        <a href="login.html" class="ios-menu-item" id="navLogin"><i class="bi bi-box-arrow-in-right"></i> Đăng nhập</a>
-        <a href="register.html" class="ios-menu-item" id="navRegister"><i class="bi bi-person-plus-fill"></i> Đăng ký</a>
+        <a href="checkout.html" class="ios-menu-item"><i class="bi bi-credit-card-fill"></i> Thanh toán</a>
+        <a href="order-history.html" class="ios-menu-item"><i class="bi bi-clock-history"></i> Lịch sử đơn</a>
         <a href="#" class="ios-menu-item text-danger" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
         <div style="height: 1px; background: rgba(255,255,255,0.2); margin: 5px 0;"></div>
         <a href="#" class="ios-menu-item text-warning" onclick="toggleDarkMode()"><i class="bi bi-moon-stars-fill" id="darkModeIcon"></i> <span id="darkModeText">Giao diện Tối</span></a>
@@ -182,8 +164,8 @@
 <div class="simple-menu-container d-none" id="simpleMenuContainer">
     <div class="simple-dropdown" id="simpleDropdown">
         <a href="index.html" class="ios-menu-item" id="simpleNavHome"><i class="bi bi-house-door-fill"></i> Trang chủ</a>
-        <a href="login.html" class="ios-menu-item" id="simpleNavLogin"><i class="bi bi-box-arrow-in-right"></i> Đăng nhập</a>
-        <a href="register.html" class="ios-menu-item" id="simpleNavRegister"><i class="bi bi-person-plus-fill"></i> Đăng ký</a>
+        <a href="checkout.html" class="ios-menu-item"><i class="bi bi-credit-card-fill"></i> Thanh toán</a>
+        <a href="order-history.html" class="ios-menu-item"><i class="bi bi-clock-history"></i> Lịch sử đơn</a>
         <a href="#" class="ios-menu-item text-danger" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
         <div style="height: 1px; background: rgba(255,255,255,0.2); margin: 5px 0;"></div>
         <a href="#" class="ios-menu-item text-warning" onclick="toggleDarkMode()"><i class="bi bi-moon-stars-fill" id="simpleDarkModeIcon"></i> <span id="simpleDarkModeText">Giao diện Tối</span></a>
@@ -198,10 +180,6 @@
         window.location.href = 'login.html';
     } else {
         document.getElementById('welcomeMessage').innerText = `Xin chào, ${loggedInUser.userName}`;
-        document.getElementById('navLogin').classList.add('disabled');
-        document.getElementById('navRegister').classList.add('disabled');
-        document.getElementById('simpleNavLogin').classList.add('disabled');
-        document.getElementById('simpleNavRegister').classList.add('disabled');
         document.getElementById('navHome').classList.add('disabled');
         document.getElementById('simpleNavHome').classList.add('disabled');
     }
@@ -212,7 +190,14 @@
         document.getElementById('simpleMenuContainer').classList.remove('d-none');
     }
 
-    let isDarkMode = localStorage.getItem('darkMode') === 'true';
+    let isDarkMode = localStorage.getItem('darkMode');
+    if (isDarkMode === null) {
+        isDarkMode = true;
+        localStorage.setItem('darkMode', 'true');
+    } else {
+        isDarkMode = isDarkMode === 'true';
+    }
+
     if (isDarkMode) {
         document.body.classList.add('dark-mode');
         updateDarkModeUI(true);
@@ -241,10 +226,14 @@
         window.location.reload();
     }
 
+    function logout() {
+        localStorage.removeItem('loggedInUser');
+        window.location.href = 'login.html';
+    }
+
     function showToast(message, type = 'success') {
         const container = document.getElementById('toast-container');
         document.getElementById('toast-message').innerText = message;
-        
         if (type === 'success') {
             container.className = 'toast-success'; 
             document.getElementById('toast-icon').className = 'bi bi-check-circle-fill toast-icon';
@@ -252,15 +241,13 @@
             container.className = 'toast-error'; 
             document.getElementById('toast-icon').className = 'bi bi-x-circle-fill toast-icon';
         }
-
         setTimeout(() => container.classList.add('show'), 10);
         setTimeout(() => container.classList.remove('show'), 3000);
     }
 
     let products = [];
-    let cart = [];
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
     let currentView = 'grid';
-    const MAX_TOTAL_ITEMS = 20;
 
     async function fetchProducts() {
         try {
@@ -276,6 +263,7 @@
             }));
             
             renderProducts(products);
+            updateCartUI(); 
         } catch (error) {
             showToast("Lỗi kết nối máy chủ. Không thể tải sản phẩm!", 'error');
         }
@@ -300,16 +288,6 @@
         grid.innerHTML = '';
         
         items.forEach(product => {
-            let actionButtons = `
-                <div class="add-cart-wrapper mt-auto">
-                    <button class="btn btn-glass" onclick="addToCart(${product.id}, 1)">Thêm vào giỏ</button>
-                    <div class="add-cart-dropdown">
-                        <button class="qty-opt-btn" onclick="addToCart(${product.id}, 2)">x2</button>
-                        <button class="qty-opt-btn" onclick="addToCart(${product.id}, 5)">x5</button>
-                        <button class="qty-opt-btn" onclick="addToCart(${product.id}, 10)">x10</button>
-                    </div>
-                </div>`;
-
             if (currentView === 'grid') {
                 grid.innerHTML += `
                     <div class="col-lg-3 col-md-6 mb-4">
@@ -318,23 +296,19 @@
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title">${product.name}</h5>
                                 <p class="card-text mt-2">${product.desc}</p>
-                                <p class="price mb-2">${product.price.toLocaleString('vi-VN')} VNĐ</p>
-                                ${actionButtons}
+                                <p class="price mt-auto">${product.price.toLocaleString('vi-VN')} VNĐ</p>
                             </div>
                         </div>
                     </div>`;
             } else {
                 grid.innerHTML += `
                     <div class="col-lg-6 col-md-12 mb-4">
-                        <div class="card card-list-view">
+                        <div class="card card-list-view" onclick="window.location.href='product-detail.html?id=${product.id}'">
                             <img src="${product.image}" class="card-img-top" alt="${product.name}">
                             <div class="card-body d-flex flex-column">
                                 <h5 class="card-title">${product.name}</h5>
                                 <p class="card-text mt-1 mb-2">${product.desc}</p>
-                                <div class="d-flex justify-content-between align-items-end mt-auto pt-2">
-                                    <p class="price m-0 me-3" style="white-space: nowrap;">${product.price.toLocaleString('vi-VN')} VNĐ</p>
-                                    <div style="width: 50%;">${actionButtons}</div>
-                                </div>
+                                <p class="price mt-auto">${product.price.toLocaleString('vi-VN')} VNĐ</p>
                             </div>
                         </div>
                     </div>`;
@@ -342,48 +316,35 @@
         });
     }
 
-    function getCartTotalItems() {
-        return cart.reduce((sum, item) => sum + item.quantity, 0);
-    }
-
-    function addToCart(productId, amount = 1) {
-        const product = products.find(p => p.id === productId);
-        if (!product) return;
-
-        if (getCartTotalItems() + amount > MAX_TOTAL_ITEMS) {
-            showToast(`Giỏ hàng chỉ được chứa tối đa ${MAX_TOTAL_ITEMS} sản phẩm!`, 'error');
-            return;
-        }
-
-        const existingItem = cart.find(item => item.id === productId);
-        if (existingItem) {
-            existingItem.quantity += amount;
-        } else {
-            cart.push({ ...product, quantity: amount });
-        }
-        
-        updateCartUI();
-        showToast(`Đã thêm ${amount} "${product.name}" vào giỏ hàng!`, 'success');
-    }
+    function getCartTotalItems() { return cart.reduce((sum, item) => sum + item.quantity, 0); }
 
     function updateQuantity(productId, change) {
         const itemIndex = cart.findIndex(item => item.id === productId);
         if (itemIndex > -1) {
-            if (change > 0 && getCartTotalItems() >= MAX_TOTAL_ITEMS) {
-                showToast(`Giỏ hàng chỉ được chứa tối đa ${MAX_TOTAL_ITEMS} sản phẩm!`, 'error');
+            const item = cart[itemIndex];
+      
+            if (change > 0 && getCartTotalItems() >= 20) {
+                showToast(`Giỏ hàng chỉ được chứa tối đa 20 sản phẩm!`, 'error');
                 return;
             }
 
-            cart[itemIndex].quantity += change;
-            if (cart[itemIndex].quantity <= 0) {
+            if (change > 0 && item.stockQuantity && item.quantity + change > item.stockQuantity) {
+                showToast(`Chỉ còn ${item.stockQuantity} sản phẩm trong kho!`, 'error');
+                return;
+            }
+
+            item.quantity += change;
+            if (item.quantity <= 0) {
                 cart.splice(itemIndex, 1);
             }
+            localStorage.setItem('cart', JSON.stringify(cart));
             updateCartUI();
         }
     }
 
     function removeFromCart(productId) {
-        cart = cart.filter(item => item.id !== productId);
+        cart = cart.filter(item => String(item.id) !== String(productId));
+        localStorage.setItem('cart', JSON.stringify(cart));
         updateCartUI();
         showToast("Đã xóa sản phẩm khỏi giỏ hàng!", 'success');
     }
@@ -391,6 +352,7 @@
     function clearCart() {
         if (cart.length === 0) return;
         cart = [];
+        localStorage.setItem('cart', JSON.stringify(cart));
         updateCartUI();
         showToast("Đã xóa toàn bộ giỏ hàng!", 'success');
     }
@@ -415,22 +377,25 @@
                 totalItems += item.quantity;
                 totalPrice += item.price * item.quantity;
                 
+                const variantHtml = item.variant && item.variant !== "Mặc định" ? `<p class="cart-item-variant">${item.variant}</p>` : '';
+
                 cartItemsList.innerHTML += `
                     <div class="cart-item">
                         <div class="cart-item-left">
                             <img src="${item.image}" class="cart-item-img">
                             <div>
                                 <p class="cart-item-title">${item.name}</p>
+                                ${variantHtml}
                                 <p class="cart-item-price">${item.price.toLocaleString('vi-VN')} VNĐ</p>
                             </div>
                         </div>
                         <div class="d-flex align-items-center">
                             <div class="qty-controls">
-                                <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">-</button>
+                                <button class="qty-btn" onclick="updateQuantity('${item.id}', -1)">-</button>
                                 <span class="qty-display">${item.quantity}</span>
-                                <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+                                <button class="qty-btn" onclick="updateQuantity('${item.id}', 1)">+</button>
                             </div>
-                            <button class="btn-remove-item" onclick="removeFromCart(${item.id})" title="Xóa sản phẩm này"><i class="bi bi-trash"></i></button>
+                            <button class="btn-remove-item" onclick="removeFromCart('${item.id}')" title="Xóa sản phẩm này"><i class="bi bi-trash"></i></button>
                         </div>
                     </div>
                 `;
@@ -439,11 +404,6 @@
         
         cartCount.innerText = totalItems;
         cartTotalPrice.innerText = `${totalPrice.toLocaleString('vi-VN')} VNĐ`;
-    }
-
-    function logout() {
-        localStorage.removeItem('loggedInUser');
-        window.location.href = 'login.html';
     }
 
     fetchProducts();
