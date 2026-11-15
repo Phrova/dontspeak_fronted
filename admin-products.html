@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Sản phẩm - ByQ Store</title>
+    
+    <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dvsva8hxi/image/upload/v1794492754/b6ed47bf0e27d8a3e156e487d5f5b255_hbr16j.jpg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        /* Matches admin.html background overlay */
+        body { 
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), url('https://res.cloudinary.com/dvsva8hxi/image/upload/v1794496554/f9f8fac14f5405772749bf33b55507e0_vv72wy.jpg'); 
+            background-size: cover; background-position: center; background-attachment: fixed; 
+            margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            color: #fff; min-height: 100vh;
+        }
+        
+        .sidebar { 
+            background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(30px) saturate(180%); 
+            height: 100vh; position: fixed; width: 250px; border-right: 1px solid rgba(255, 255, 255, 0.1); 
+            padding-top: 20px; 
+        }
+        .sidebar-brand { font-weight: 800; font-size: 1.5rem; color: #fff; text-align: center; margin-bottom: 30px; display: block; text-decoration: none; }
+        .sidebar-brand:hover { color: #4ade80; }
+        .nav-item { padding: 12px 20px; color: rgba(255, 255, 255, 0.7); text-decoration: none; display: flex; align-items: center; gap: 15px; font-weight: 600; border-left: 3px solid transparent; transition: all 0.2s; }
+        .nav-item:hover, .nav-item.active { background: rgba(74, 222, 128, 0.1); color: #4ade80; border-left-color: #4ade80; }
+        
+        .main-content { margin-left: 250px; padding: 30px; }
+        
+        /* Brighter Glass Panel */
+        .table-glass { 
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)); 
+            backdrop-filter: blur(25px) saturate(180%); 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+            border-radius: 20px; 
+            overflow: hidden; 
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
+        
+        .table { 
+            color: #fff; margin-bottom: 0; 
+            --bs-table-bg: transparent !important; 
+            --bs-table-color: #fff !important; 
+            border-collapse: collapse;
+        }
+        
+        .table thead th { 
+            background: rgba(0, 0, 0, 0.2); /* Lighter header */
+            color: #4ade80; 
+            border: none; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-weight: 800; 
+            font-size: 0.95rem;
+            padding: 15px 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .table tbody tr {
+            transition: background 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1); /* Lighter hover effect */
+        }
+        
+        .table td { 
+            border: none;
+            vertical-align: middle; 
+            padding: 15px 20px;
+            font-size: 1rem;
+        }
+        
+        .detail-row td { 
+            background: rgba(0, 0, 0, 0.2) !important; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+        }
+
+        .text-id { color: rgba(255, 255, 255, 0.6); font-weight: 600; }
+        .text-price { color: #4ade80; font-weight: 700; font-size: 1.05rem; }
+        .text-muted-custom { color: rgba(255, 255, 255, 0.7); }
+        
+        /* Buttons */
+        .btn-add { 
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(21, 128, 61, 0.9)); 
+            border: 1px solid rgba(74, 222, 128, 0.5); 
+            color: #fff; font-weight: 800; font-size: 1.1rem;
+            border-radius: 12px; padding: 12px 24px; 
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-add:hover { 
+            background: linear-gradient(135deg, rgba(34, 197, 94, 1), rgba(21, 128, 61, 1)); 
+            color: #fff; transform: translateY(-2px); 
+            box-shadow: 0 15px 25px rgba(34, 197, 94, 0.5);
+        }
+        
+        .btn-action {
+            width: 40px; height: 40px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+            border-radius: 10px; font-size: 1.1rem; transition: all 0.2s;
+        }
+        
+        /* Glass Modals */
+        .modal-content { 
+            background: rgba(30, 30, 30, 0.6); 
+            backdrop-filter: blur(30px) saturate(180%);
+            color: #fff; 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+            border-radius: 20px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+        .modal-header { border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .modal-footer { border-top: 1px solid rgba(255,255,255,0.1); }
+        .modal .form-label { font-weight: 600; color: #4ade80; }
+        .modal .form-control, .modal .form-select { 
+            background: rgba(0, 0, 0, 0.4); 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            color: #fff; 
+            border-radius: 10px; 
+            padding: 12px; 
+        }
+        .modal .form-control:focus, .modal .form-select:focus { 
+            background: rgba(255, 255, 255, 0.95); 
+            color: #111; 
+            border-color: #22c55e; 
+        }
+        .btn-close-white { filter: invert(1); }
+        
+        /* Toast */
+        #toast-container { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); z-index: 9999; padding: 12px 24px; border-radius: 50px; display: flex; align-items: center; gap: 10px; font-weight: 600; color: white; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: top 0.5s; backdrop-filter: blur(20px); }
+        #toast-container.show { top: 30px; }
+        .toast-success { background: rgba(34, 197, 94, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .toast-error { background: rgba(239, 68, 68, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"><i id="toast-icon" class="bi bi-check-circle-fill"></i><span id="toast-message"></span></div>
+
+<div class="sidebar">
+    <a href="#" class="sidebar-brand">ByQ Store Admin</a>
+    
+    <a href="admin.html" class="nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="admin-discounts.html" class="nav-item"><i class="bi bi-tags-fill"></i> Quản lý Khuyến mãi</a>
+    <a href="admin-products.html" class="nav-item active"><i class="bi bi-box-seam-fill"></i> Quản lý Sản phẩm</a>
+    <a href="admin-orders.html" class="nav-item"><i class="bi bi-truck"></i> Quản lý Đơn hàng</a>
+    
+    <div style="position: absolute; bottom: 20px; width: 100%;">
+        <a href="index.html" class="nav-item"><i class="bi bi-shop"></i> Về Cửa hàng</a>
+        <a href="#" onclick="logout()" class="nav-item text-danger"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h2 style="font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,0.3); font-size: 2rem;">Quản lý sản phẩm</h2>
+        <button class="btn btn-add" onclick="openProductModal(null)"><i class="bi bi-plus-circle me-2"></i> Thêm sản phẩm</button>
+    </div>
+
+    <div class="table-glass">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Giá niêm yết</th>
+                    <th>Tồn kho</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody id="productBody">
+                <tr><td colspan="5" class="text-center py-5 text-muted-custom">Đang tải dữ liệu...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal sản phẩm -->
+<div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="productModalTitle">Thêm sản phẩm</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="mb-4"><label class="form-label">Tên sản phẩm</label>
+                    <input type="text" class="form-control" id="pName" placeholder="Vợt cầu lông Yonex..."></div>
+                <div class="mb-4"><label class="form-label">Giá niêm yết (VND)</label>
+                    <input type="number" class="form-control" id="pPrice" step="1000" min="0" placeholder="1000000"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-add" onclick="saveProduct()">Lưu sản phẩm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal biến thể -->
+<div class="modal fade" id="variantModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="variantModalTitle">Thêm biến thể</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3"><label class="form-label">Màu sắc</label><input type="text" class="form-control" id="vColor" placeholder="Đỏ Đô"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Loại dây</label><input type="text" class="form-control" id="vString" placeholder="Yonex BG65"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Tension</label><input type="text" class="form-control" id="vTension" placeholder="22 lbs"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Cỡ cán</label><input type="text" class="form-control" id="vGrip" placeholder="3U/G5"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Giá bán (VND)</label><input type="number" class="form-control" id="vPrice" step="1000" min="0" placeholder="4690000"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Tồn kho</label><input type="number" class="form-control" id="vStock" min="0" placeholder="10"></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Kiểu giảm giá</label>
+                        <select class="form-select" id="vDiscType" onchange="document.getElementById('vDiscValue').disabled = !this.value">
+                            <option value="">Không giảm</option><option value="PERCENT">Theo % (PERCENT)</option><option value="FIXED">Số tiền cố định (FIXED)</option>
+                        </select></div>
+                    <div class="col-md-6 mb-3"><label class="form-label">Giá trị giảm</label><input type="number" class="form-control" id="vDiscValue" min="0" disabled></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-add" onclick="saveVariant()">Lưu biến thể</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const API = 'http://localhost:8080';
+    const me = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!me || me.role !== 'ADMIN') { alert('Bạn không có quyền truy cập trang này!'); window.location.href = 'login.html'; }
+    const authHeaders = { 'Content-Type': 'application/json', 'X-User-Id': me.id };
+
+    let products = [], stockMap = {}, variantsCache = {};
+    let productModalId = null, variantModalState = { productId: null, variantId: null };
+    const productModal = new bootstrap.Modal(document.getElementById('productModal'));
+    const variantModal = new bootstrap.Modal(document.getElementById('variantModal'));
+
+    const fmt = n => Number(n || 0).toLocaleString('vi-VN') + ' ₫';
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const discountLabel = v => !v.discountType ? '—' : (v.discountType === 'PERCENT' ? '-' + v.discountValue + '%' : '-' + fmt(v.discountValue));
+    const finalPrice = v => { if (!v.discountType) return v.price;
+        const p = v.discountType === 'PERCENT' ? v.price * (100 - v.discountValue) / 100 : v.price - v.discountValue;
+        return Math.max(0, Math.round(p)); };
+
+    function showToast(message, type) {
+        const c = document.getElementById('toast-container');
+        document.getElementById('toast-message').innerText = message;
+        document.getElementById('toast-icon').className = type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill';
+        c.className = type === 'success' ? 'toast-success' : 'toast-error';
+        setTimeout(() => c.classList.add('show'), 10);
+        setTimeout(() => c.classList.remove('show'), 3000);
+    }
+    function logout() { localStorage.removeItem('loggedInUser'); window.location.href = 'login.html'; }
+
+    async function load() {
+        const [pRes, sRes] = await Promise.all([fetch(API + '/product/getAll'), fetch(API + '/product/stock')]);
+        products = await pRes.json(); stockMap = await sRes.json();
+        variantsCache = {};
+        render();
+    }
+
+    function render() {
+        const body = document.getElementById('productBody');
+        if (!products.length) { body.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted-custom">Chưa có sản phẩm nào.</td></tr>'; return; }
+        body.innerHTML = products.map(p => `
+            <tr>
+                <td class="text-id">#${p.id}</td>
+                <td class="fw-bold" style="font-size: 1.1rem;">${esc(p.productName)}</td>
+                <td class="text-price">${fmt(p.productPrice)}</td>
+                <td><span class="badge" style="background: rgba(255,255,255,0.2); font-size: 0.9rem; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.3);">${stockMap[p.id] || 0}</span></td>
+                <td class="text-end">
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-sm btn-outline-light btn-action" title="Xem biến thể" onclick="toggleVariants(${p.id})"><i class="bi bi-box-seam"></i></button>
+                        <button class="btn btn-sm btn-outline-warning btn-action" title="Sửa" onclick="openProductModal(${p.id})"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-outline-danger btn-action" title="Xóa" onclick="deleteProduct(${p.id})"><i class="bi bi-trash"></i></button>
+                    </div>
+                </td>
+            </tr>
+            <tr class="detail-row" id="detail-${p.id}" style="display:none"><td colspan="5"><div id="variants-${p.id}"></div></td></tr>
+        `).join('');
+    }
+
+    async function toggleVariants(pid) {
+        const tr = document.getElementById('detail-' + pid);
+        if (tr.style.display === 'none') {
+            tr.style.display = '';
+            await loadVariants(pid);
+        } else tr.style.display = 'none';
+    }
+
+    async function loadVariants(pid) {
+        const box = document.getElementById('variants-' + pid);
+        box.innerHTML = '<span class="text-muted-custom">Đang tải biến thể...</span>';
+        const list = await (await fetch(API + '/product/variants/' + pid)).json();
+        variantsCache[pid] = list;
+        box.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <strong style="color:#4ade80; font-size:1.1rem;"><i class="bi bi-list-task me-2"></i>Danh sách biến thể</strong>
+                <button class="btn btn-sm btn-add py-1 px-3" onclick="openVariantModal(${pid}, null)"><i class="bi bi-plus-lg"></i> Thêm</button>
+            </div>
+            ${list.length ? `<table class="table table-sm table-borderless" style="background: transparent; margin-bottom: 0;">
+                <thead><tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                    <th>Màu</th><th>Dây</th><th>Tension</th><th>Cán</th><th>Giá gốc</th><th>Giảm</th><th>Giá bán</th><th class="text-center">Tồn</th><th></th>
+                </tr></thead>
+                <tbody>${list.map(v => `<tr>
+                    <td class="fw-bold">${esc(v.color)}</td><td>${esc(v.stringType)}</td><td>${esc(v.tension)}</td><td>${esc(v.weightGrip)}</td>
+                    <td class="text-muted-custom text-decoration-line-through">${fmt(v.price)}</td>
+                    <td class="text-danger fw-bold">${discountLabel(v)}</td>
+                    <td class="text-price">${fmt(finalPrice(v))}</td>
+                    <td class="text-center fw-bold">${v.stockQuantity}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-warning" onclick="openVariantModal(${pid}, ${v.id})"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteVariant(${pid}, ${v.id})"><i class="bi bi-trash"></i></button>
+                    </td></tr>`).join('')}</tbody></table>`
+            : '<em class="text-muted-custom">Sản phẩm này chưa có biến thể nào.</em>'}`;
+    }
+
+    function openProductModal(id) {
+        productModalId = id;
+        const p = id ? products.find(x => x.id === id) : null;
+        document.getElementById('productModalTitle').innerText = p ? 'Sửa sản phẩm #' + id : 'Thêm sản phẩm mới';
+        document.getElementById('pName').value = p ? p.productName : '';
+        document.getElementById('pPrice').value = p ? p.productPrice : '';
+        productModal.show();
+    }
+
+    async function saveProduct() {
+        const body = { productName: document.getElementById('pName').value.trim(),
+                       productPrice: Number(document.getElementById('pPrice').value), variants: [] };
+        if (!body.productName || !body.productPrice || body.productPrice <= 0) { showToast('Nhập đủ tên và giá hợp lệ!', 'error'); return; }
+        const res = await fetch(productModalId ? API + '/admin/product/' + productModalId : API + '/admin/product/create',
+            { method: productModalId ? 'PUT' : 'POST', headers: authHeaders, body: JSON.stringify(body) });
+        if (res.ok) { showToast(productModalId ? 'Cập nhật sản phẩm thành công' : 'Tạo sản phẩm thành công', 'success'); productModal.hide(); load(); }
+        else showToast('Lỗi: ' + await res.text(), 'error');
+    }
+
+    async function deleteProduct(id) {
+        const p = products.find(x => x.id === id);
+        if (!confirm(`Xóa sản phẩm "${p.productName}"? Toàn bộ biến thể của nó cũng sẽ bị xóa.`)) return;
+        const res = await fetch(API + '/admin/product/' + id, { method: 'DELETE', headers: authHeaders });
+        if (res.ok) { showToast('Đã xóa sản phẩm', 'success'); load(); } else showToast('Lỗi: ' + await res.text(), 'error');
+    }
+
+    function openVariantModal(pid, vid) {
+        variantModalState = { productId: pid, variantId: vid };
+        const v = vid ? (variantsCache[pid] || []).find(x => x.id === vid) : null;
+        document.getElementById('variantModalTitle').innerText = v ? 'Sửa biến thể #' + vid : 'Thêm biến thể cho SP #' + pid;
+        document.getElementById('vColor').value = v ? v.color : '';
+        document.getElementById('vString').value = v ? v.stringType : '';
+        document.getElementById('vTension').value = v ? v.tension : '';
+        document.getElementById('vGrip').value = v ? v.weightGrip : '';
+        document.getElementById('vPrice').value = v ? v.price : '';
+        document.getElementById('vStock').value = v ? v.stockQuantity : 0;
+        document.getElementById('vDiscType').value = v && v.discountType ? v.discountType : '';
+        document.getElementById('vDiscValue').disabled = !(v && v.discountType);
+        document.getElementById('vDiscValue').value = v && v.discountValue != null ? v.discountValue : '';
+        variantModal.show();
+    }
+
+    async function saveVariant() {
+        const { productId, variantId } = variantModalState;
+        const discType = document.getElementById('vDiscType').value || null;
+        const body = {
+            color: document.getElementById('vColor').value.trim(),
+            stringType: document.getElementById('vString').value.trim(),
+            tension: document.getElementById('vTension').value.trim(),
+            weightGrip: document.getElementById('vGrip').value.trim(),
+            price: Number(document.getElementById('vPrice').value),
+            stockQuantity: Number(document.getElementById('vStock').value || 0),
+            discountType: discType,
+            discountValue: discType ? Number(document.getElementById('vDiscValue').value) : null
+        };
+        if (!body.color || !body.price || body.price <= 0) { showToast('Nhập đủ màu và giá hợp lệ!', 'error'); return; }
+        const res = await fetch(variantId ? API + '/admin/product/variant/' + variantId : API + '/admin/product/' + productId + '/variant',
+            { method: variantId ? 'PUT' : 'POST', headers: authHeaders, body: JSON.stringify(body) });
+        if (res.ok) { showToast('Lưu biến thể thành công', 'success'); variantModal.hide(); await loadVariants(productId); refreshStock(productId); }
+        else showToast('Lỗi: ' + await res.text(), 'error');
+    }
+
+    async function deleteVariant(pid, vid) {
+        if (!confirm('Xóa biến thể này?')) return;
+        const res = await fetch(API + '/admin/product/variant/' + vid, { method: 'DELETE', headers: authHeaders });
+        if (res.ok) { showToast('Đã xóa biến thể', 'success'); await loadVariants(pid); refreshStock(pid); }
+        else showToast('Lỗi: ' + await res.text(), 'error');
+    }
+
+    async function refreshStock(pid) {
+        stockMap = await (await fetch(API + '/product/stock')).json();
+        const cell = document.getElementById('stock-' + pid);
+        if (cell) cell.innerText = stockMap[pid] || 0;
+    }
+
+    load();
+</script>
+</body>
+</html>

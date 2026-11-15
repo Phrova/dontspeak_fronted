@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+        <script src="https://accounts.google.com/gsi/client" async defer></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - BadStore</title>
@@ -131,6 +132,19 @@
             <input type="password" class="form-control" id="password" required placeholder="Nhập mật khẩu">
         </div>
         <button type="submit" class="btn btn-success w-100 py-2 mt-2">Đăng nhập</button>
+         
+        <div id="g_id_onload"
+             data-client_id="370993025556-n1p2mcd7mrb3lafds60jutghrd5ehrja.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse">
+        </div>
+        <div class="g_id_signin w-100 d-flex justify-content-center mt-3" 
+             data-type="standard" 
+             data-shape="pill" 
+             data-theme="outline" 
+             data-text="signin_with" 
+             data-size="large" 
+             data-logo_alignment="left">
+        </div>
         <p class="text-center mt-3 mb-0 register-text">
             Chưa có tài khoản? <a href="register.html" class="register-link">Đăng ký ngay</a>
         </p>
@@ -185,7 +199,12 @@
                 showToast(`Chào mừng trở lại, ${user.userName}!`, 'success');
                 
                 setTimeout(() => {
-                    window.location.href = 'index.html'; 
+                    // UPDATED LOGIC: Check role and redirect
+                    if (user.role === 'ADMIN') {
+                        window.location.href = 'admin.html'; 
+                    } else {
+                        window.location.href = 'index.html'; 
+                    }
                 }, 1500);
 
             } else {
@@ -195,6 +214,32 @@
             showToast('Lỗi máy chủ. Hãy chắc chắn Spring Boot đang chạy!', 'error');
         }
     });
+        function handleCredentialResponse(response) {
+        fetch('http://localhost:8080/user/google-login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential: response.credential })
+        })
+        .then(res => {
+            if (res.ok) return res.json();
+            throw new Error('Google login failed');
+        })
+        .then(user => {
+            localStorage.setItem('loggedInUser', JSON.stringify(user));
+            showToast(`Chào mừng, ${user.userName}!`, 'success');
+            
+            setTimeout(() => {
+                if (user.role === 'ADMIN') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }, 1500);
+        })
+        .catch(err => {
+            showToast('Đăng nhập Google thất bại!', 'error');
+        });
+    }
 </script>
 </body>
 </html>
