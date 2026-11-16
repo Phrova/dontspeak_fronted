@@ -1,0 +1,377 @@
+/* ===== ByQ Store — iOS Glass Design System (smooth tuned) ===== */
+:root {
+    --ios-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);      /* gentle exit */
+    --ios-spring: cubic-bezier(0.22, 1.28, 0.36, 1);        /* ONE soft overshoot = iOS feel */
+    --green: #4ade80;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    background-image: linear-gradient(rgba(0,0,0,.6), rgba(0,0,0,.8)),
+                      url('https://res.cloudinary.com/dvsva8hxi/image/upload/v1794496554/f9f8fac14f5405772749bf33b55507e0_vv72wy.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #fff;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+    background: rgba(0,0,0,.4);
+    backdrop-filter: blur(30px) saturate(180%);
+    height: 100vh;
+    position: fixed;
+    width: 250px;
+    border-right: 1px solid rgba(255,255,255,.1);
+    padding-top: 20px;
+    animation: slideInLeft 0.35s var(--ios-ease);
+}
+
+@keyframes slideInLeft {
+    from { transform: translateX(-100%); opacity: 0; }
+    to   { transform: translateX(0); opacity: 1; }
+}
+
+.sidebar-brand {
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 30px;
+    display: block;
+    text-decoration: none;
+    transition: color 0.2s var(--ios-ease);
+}
+.sidebar-brand:hover { color: var(--green); }
+
+.nav-item {
+    padding: 12px 20px;
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-weight: 600;
+    border-left: 3px solid transparent;
+    transition: all 0.2s var(--ios-ease);
+}
+.nav-item:hover, .nav-item.active {
+    background: rgba(74,222,128,.1);
+    color: var(--green);
+    border-left-color: var(--green);
+    padding-left: 25px;
+}
+
+/* ---------- Main content ---------- */
+.main-content {
+    margin-left: 250px;
+    padding: 30px;
+    animation: fadeUpIn 0.4s var(--ios-ease) 0.05s both;
+}
+
+@keyframes fadeUpIn {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Glass table ---------- */
+.table-glass {
+    background: linear-gradient(135deg, rgba(255,255,255,.2), rgba(255,255,255,.05));
+    backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.3);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,.4);
+}
+
+.table {
+    color: #fff;
+    margin-bottom: 0;
+    --bs-table-bg: transparent !important;
+    --bs-table-color: #fff !important;
+}
+
+.table thead th {
+    background: rgba(0,0,0,.2);
+    color: var(--green);
+    border: none;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    font-weight: 800;
+    font-size: .95rem;
+    padding: 15px 20px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+/* NOTE: opacity/transform ONLY here — no scale on hover rows (that's what caused lag over backdrop-filter) */
+.table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    transition: background 0.15s var(--ios-ease);
+    opacity: 0;
+    animation: rowFadeIn 0.3s var(--ios-ease) forwards;
+}
+
+@keyframes rowFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* tight stagger — 0.03s steps, capped */
+.table tbody tr:nth-child(1)  { animation-delay: 0.04s; }
+.table tbody tr:nth-child(2)  { animation-delay: 0.07s; }
+.table tbody tr:nth-child(3)  { animation-delay: 0.10s; }
+.table tbody tr:nth-child(4)  { animation-delay: 0.13s; }
+.table tbody tr:nth-child(5)  { animation-delay: 0.16s; }
+.table tbody tr:nth-child(6)  { animation-delay: 0.19s; }
+.table tbody tr:nth-child(7)  { animation-delay: 0.22s; }
+.table tbody tr:nth-child(8)  { animation-delay: 0.25s; }
+.table tbody tr:nth-child(9)  { animation-delay: 0.28s; }
+.table tbody tr:nth-child(10) { animation-delay: 0.31s; }
+.table tbody tr:nth-child(n+11) { animation-delay: 0.34s; }
+
+/* hover = color only, cheap repaint */
+.table tbody tr:hover { background: rgba(255,255,255,.12); }
+
+.table td {
+    border: none;
+    vertical-align: middle;
+    padding: 15px 20px;
+    font-size: 1rem;
+}
+
+/* variant detail row open/close — your JS adds these classes */
+.detail-row td {
+    background: rgba(0,0,0,.2) !important;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    padding: 20px;
+}
+.detail-open { animation: detailIn 0.25s var(--ios-ease); transform-origin: top center; }
+@keyframes detailIn {
+    from { opacity: 0; transform: scaleY(0.7); }
+    to   { opacity: 1; transform: scaleY(1); }
+}
+.detail-close { animation: detailOut 0.18s var(--ios-ease) forwards; transform-origin: top center; }
+@keyframes detailOut {
+    from { opacity: 1; transform: scaleY(1); }
+    to   { opacity: 0; transform: scaleY(0.7); }
+}
+
+.text-id { color: rgba(255,255,255,.6); font-weight: 600; }
+.text-price { color: var(--green); font-weight: 700; font-size: 1.05rem; }
+.text-muted-custom { color: rgba(255,255,255,.7); }
+
+/* ---------- Buttons ---------- */
+.btn-add, .btn-glass, .btn-glass-danger {
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 700;
+    font-size: 1rem;
+    backdrop-filter: blur(10px);
+    border: 1px solid;
+    transition: transform 0.15s var(--ios-spring), box-shadow 0.15s var(--ios-ease), background 0.15s;
+    will-change: transform;
+}
+
+.btn-add {
+    background: linear-gradient(135deg, rgba(34,197,94,.9), rgba(21,128,61,.9));
+    border-color: rgba(74,222,128,.5);
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(34,197,94,.3);
+}
+.btn-add:hover {
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 14px 24px rgba(34,197,94,.5);
+}
+
+.btn-glass {
+    background: rgba(255,255,255,.12);
+    border-color: rgba(255,255,255,.3);
+    color: #fff;
+}
+.btn-glass:hover { background: rgba(255,255,255,.22); color: #fff; transform: translateY(-2px); }
+
+.btn-glass-danger {
+    background: rgba(239,68,68,.22);
+    border-color: rgba(239,68,68,.55);
+    color: #fca5a5;
+}
+.btn-glass-danger:hover { background: rgba(239,68,68,.4); color: #fff; transform: translateY(-2px); }
+
+.btn-add:active, .btn-glass:active, .btn-glass-danger:active, .btn-icon:active {
+    transform: scale(0.95);
+    transition-duration: 0.06s;
+}
+
+.btn-icon {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.25);
+    color: #fff;
+    backdrop-filter: blur(10px);
+    transition: all 0.15s var(--ios-spring);
+}
+.btn-icon:hover { background: rgba(255,255,255,.2); color: #fff; transform: scale(1.12); }
+
+.btn-icon.icon-warn { color: #fbbf24; border-color: rgba(251,191,36,.4); }
+.btn-icon.icon-warn:hover { background: rgba(251,191,36,.2); }
+.btn-icon.icon-danger { color: #f87171; border-color: rgba(239,68,68,.4); }
+.btn-icon.icon-danger:hover { background: rgba(239,68,68,.2); }
+
+/* ---------- Modals — fast iOS sheet ---------- */
+.modal-content {
+    background: rgba(30,30,30,.6) !important;
+    backdrop-filter: blur(30px) saturate(180%) !important;
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,.3) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 25px 50px rgba(0,0,0,.5) !important;
+}
+
+/* smaller travel distance + shorter time = snappy, not floaty */
+.modal.fade .modal-dialog {
+    transform: translateY(28px) scale(0.94) !important;
+    opacity: 0 !important;
+    transition: transform 0.3s var(--ios-spring), opacity 0.2s var(--ios-ease) !important;
+}
+.modal.show .modal-dialog {
+    transform: translateY(0) scale(1) !important;
+    opacity: 1 !important;
+}
+
+.modal-backdrop.fade { opacity: 0 !important; transition: opacity 0.25s ease !important; }
+.modal-backdrop.show { opacity: 0.5 !important; }
+
+.modal-header { border-bottom: 1px solid rgba(255,255,255,.1); }
+.modal-footer { border-top: 1px solid rgba(255,255,255,.1); }
+.modal .form-label { font-weight: 600; color: var(--green); }
+
+.modal .form-control, .modal .form-select {
+    background: rgba(0,0,0,.4);
+    border: 1px solid rgba(255,255,255,.2);
+    color: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    transition: border-color 0.15s var(--ios-ease), box-shadow 0.15s var(--ios-ease), background 0.15s;
+}
+.modal .form-control:focus, .modal .form-select:focus {
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    border-color: #22c55e;
+    box-shadow: 0 0 0 4px rgba(34,197,94,.25);
+}
+.modal .form-control::placeholder { color: rgba(255,255,255,.45); }
+
+.btn-close-white { filter: invert(1); }
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+
+/* ---------- Toast — quick drop ---------- */
+#toast-container {
+    position: fixed;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    padding: 12px 24px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,.3);
+    transition: top 0.35s var(--ios-spring), opacity 0.25s var(--ios-ease);
+    backdrop-filter: blur(20px);
+}
+#toast-container.show { top: 30px; }
+.toast-success { background: rgba(34,197,94,.9); border: 1px solid rgba(255,255,255,.2); }
+.toast-error { background: rgba(239,68,68,.9); border: 1px solid rgba(255,255,255,.2); }
+
+/* ---------- Combo ---------- */
+.combo { position: relative; }
+
+.combo-toggle {
+    background: rgba(0,0,0,.4);
+    border: 1px solid rgba(255,255,255,.2);
+    color: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    width: 100%;
+    transition: border-color 0.15s var(--ios-ease);
+}
+.combo-toggle:hover { border-color: rgba(74,222,128,.6); }
+
+.combo-panel {
+    position: absolute;
+    z-index: 1080;
+    left: 0; right: 0;
+    top: calc(100% + 6px);
+    background: rgba(20,20,20,.75);
+    backdrop-filter: blur(25px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 14px;
+    box-shadow: 0 15px 40px rgba(0,0,0,.5);
+    max-height: 260px;
+    overflow: auto;
+    transform-origin: top center;
+}
+.combo-panel:not([style*="display: none"]):not(.combo-closing) { animation: dropDown 0.2s var(--ios-ease) both; }
+.combo-panel.combo-closing { animation: dropUp 0.15s var(--ios-ease) both; }
+
+@keyframes dropDown {
+    from { opacity: 0; transform: scaleY(0.85) translateY(-4px); }
+    to   { opacity: 1; transform: scaleY(1) translateY(0); }
+}
+@keyframes dropUp {
+    from { opacity: 1; transform: scaleY(1); }
+    to   { opacity: 0; transform: scaleY(0.85); }
+}
+
+.combo-option {
+    padding: 8px 12px;
+    cursor: pointer;
+    transition: background 0.12s var(--ios-ease);
+}
+.combo-option:hover { background: rgba(74,222,128,.15); }
+.combo-add { border-top: 1px solid rgba(255,255,255,.1); }
+
+/* ---------- Money hint ---------- */
+.money-wrap { position: relative; }
+.money-hint {
+    display: none;
+    position: absolute;
+    z-index: 1090;
+    left: 0; right: 0;
+    bottom: calc(100% + 8px);
+    background: rgba(20,20,20,.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 0.85rem;
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(0,0,0,.4);
+    animation: hintIn 0.18s var(--ios-ease);
+}
+@keyframes hintIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.money-wrap:hover .money-hint,
+.money-wrap:focus-within .money-hint { display: block; }
+.money-hint b { color: var(--green); }
