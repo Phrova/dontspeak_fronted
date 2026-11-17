@@ -8,7 +8,39 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="admin-theme.css">
-        <script src="page-transition.js" defer></script>
+    <script src="page-transition.js" defer></script>
+    <style>
+        .preview-scroll table { min-width: 980px; }
+        .preview-scroll th { white-space: nowrap; }
+        .preview-scroll .combo-toggle { white-space: nowrap; padding: 8px 10px; font-size: .85rem; }
+        .preview-scroll .combo-toggle > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .preview-scroll td:nth-child(1) .combo, .preview-scroll td:nth-child(2) .combo { min-width: 120px; }
+        .preview-scroll td:nth-child(3) .combo, .preview-scroll td:nth-child(4) .combo { min-width: 90px; }
+        .preview-scroll td:nth-child(5) input { min-width: 110px; }
+        .selection-bar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 1070; display: flex; gap: 12px; align-items: center; background: linear-gradient(135deg, rgba(24,24,28,.85), rgba(14,14,18,.8)); backdrop-filter: blur(25px) saturate(170%); border: 1px solid rgba(255,255,255,.2); border-radius: 18px; padding: 12px 18px; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 15px 40px rgba(0,0,0,.5); animation: fadeUpIn .25s var(--ios-ease) backwards; }
+        .sel-check { width: 18px; height: 18px; cursor: pointer; background-color: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.4); }
+        .sel-check:checked { background-color: #22c55e; border-color: #22c55e; }
+        .quick-panel { background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.15); border-radius: 14px; padding: 14px; animation: dropDown .2s var(--ios-spring) backwards; }
+        .quick-list { max-height: 140px; overflow: auto; display: flex; flex-direction: column; gap: 4px; }
+        .quick-item { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+        .quick-item:hover { background: rgba(74,222,128,.12); }
+        .chip { display: inline-block; background: rgba(74,222,128,.15); border: 1px solid rgba(74,222,128,.4); color: #4ade80; border-radius: 20px; padding: 2px 10px; font-size: .8rem; margin: 2px; }
+        .chip.skip { background: rgba(239,68,68,.12); border-color: rgba(239,68,68,.4); color: #f87171; }
+        .stepper { display: inline-flex; align-items: center; gap: 6px; }
+        .stepper button { width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.1); color: #fff; font-weight: 800; }
+        .stepper button:hover { background: rgba(255,255,255,.2); }
+        .stepper input { width: 80px; text-align: center; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.2); color: #fff; border-radius: 8px; padding: 6px; }
+        .glass-select-wrap .combo-toggle { font-weight: 700; }
+        .status-active { color: #4ade80 !important; }
+        .combo-locked { opacity: .45; pointer-events: none; }
+        .field-locked { opacity: .45; pointer-events: none; }
+        .preview-scroll { overflow: auto; max-height: 320px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; }
+        .preview-scroll table { margin: 0; }
+        .preview-scroll td, .preview-scroll th { padding: 8px 10px; font-size: .9rem; }
+        .quick-footer { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; margin-top: 10px; background: linear-gradient(135deg, rgba(24,24,28,.92), rgba(14,14,18,.9)); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.18); border-radius: 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.2); }
+        .dup-badge { font-size: .75rem; color: #f87171; border: 1px solid rgba(239,68,68,.4); background: rgba(239,68,68,.12); border-radius: 12px; padding: 2px 8px; white-space: nowrap; }
+        .ok-badge { font-size: .75rem; color: #4ade80; border: 1px solid rgba(74,222,128,.4); background: rgba(74,222,128,.12); border-radius: 12px; padding: 2px 8px; white-space: nowrap; }
+    </style>
 </head>
 <body>
 
@@ -27,16 +59,30 @@
 </div>
 
 <div class="main-content">
-    <div class="d-flex justify-content-between align-items-center mb-5">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
         <h2 style="font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,.3); font-size: 2rem;">Quản lý sản phẩm</h2>
-        <button class="btn btn-add" onclick="openProductModal(null)"><i class="bi bi-plus-circle me-2"></i> Thêm sản phẩm</button>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <select id="sortSelect" class="form-select glass-native" data-width="170px" onchange="sortMode=this.value;render()">
+                <option value="newest">Mới nhất</option>
+                <option value="oldest">Cũ nhất</option>
+                <option value="name">Tên A–Z</option>
+            </select>
+            <button class="btn btn-glass" id="selectToggle" onclick="toggleSelectMode()"><i class="bi bi-check2-square me-1"></i> Chọn nhiều</button>
+            <button class="btn btn-add" onclick="openProductModal(null)"><i class="bi bi-plus-circle me-2"></i> Thêm sản phẩm</button>
+        </div>
     </div>
     <div class="table-glass">
         <table class="table">
-            <thead><tr><th>ID</th><th>Tên sản phẩm</th><th>Thương hiệu</th><th>Giá niêm yết</th><th>Tồn kho</th><th class="text-end">Thao tác</th></tr></thead>
-            <tbody id="productBody"><tr><td colspan="6" class="text-center py-5 text-muted-custom">Đang tải dữ liệu...</td></tr></tbody>
+            <thead id="productHead"></thead>
+            <tbody id="productBody"><tr><td colspan="7" class="text-center py-5 text-muted-custom">Đang tải dữ liệu...</td></tr></tbody>
         </table>
     </div>
+</div>
+
+<div id="selectionBar" class="selection-bar" style="display:none">
+    <span id="selectionCount" class="fw-bold"></span>
+    <button class="btn btn-glass-danger btn-sm" onclick="bulkDelete()"><i class="bi bi-trash me-1"></i> Xóa mục đã chọn</button>
+    <button class="btn btn-glass btn-sm" onclick="toggleSelectMode(false)">Thoát</button>
 </div>
 
 <div class="modal fade" id="productModal" tabindex="-1">
@@ -57,6 +103,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-glass" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-glass" id="cloneBtn" style="display:none" onclick="cloneProduct()"><i class="bi bi-copy me-1"></i> Nhân bản</button>
                 <button class="btn btn-add" onclick="saveProduct()">Lưu sản phẩm</button>
             </div>
         </div>
@@ -64,43 +111,107 @@
 </div>
 
 <div class="modal fade" id="variantModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header"><h5 class="modal-title" id="variantModalTitle">Thêm biến thể</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
             <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-6 mb-3"><label class="form-label">Màu sắc</label><div class="combo" id="comboColor"></div></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Loại dây</label><div class="combo" id="comboString"></div></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Độ căng dây (kg)</label><div class="combo" id="comboTension"></div></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Trọng lượng / Cỡ cán</label><div class="combo" id="comboGrip"></div></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Giá bán (VND)</label>
-                        <div class="money-wrap">
-                            <div class="money-hint"><b>1m</b> = 1 triệu = 1.000.000 ₫ &nbsp;•&nbsp; <b>500k</b> = 500.000 ₫<br>Nhấn <b>Enter</b> để tự quy đổi.</div>
-                            <input type="text" inputmode="decimal" class="form-control" id="vPrice" placeholder="vd: 4.69m hoặc 4690000">
-                        </div></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Tồn kho</label>
-                        <input type="number" class="form-control" id="vStock" min="0" max="1000000" placeholder="10"></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Kiểu giảm giá</label>
-                        <select class="form-select" id="vDiscType" onchange="document.getElementById('vDiscValue').disabled = !this.value">
-                            <option value="">Không giảm</option><option value="PERCENT">Theo % (PERCENT)</option><option value="FIXED">Số tiền cố định (FIXED)</option>
-                        </select></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Giá trị giảm</label>
-                        <div class="money-wrap">
-                            <div class="money-hint">PERCENT: nhập 0–100. FIXED: số tiền ≤ giá bán, hỗ trợ <b>500k</b> / <b>1m</b>.</div>
-                            <input type="text" inputmode="decimal" class="form-control" id="vDiscValue" disabled>
-                        </div></div>
-                    <div class="col-md-6 mb-3"><label class="form-label">Tình trạng</label>
-                        <select class="form-select" id="vStatus" onchange="syncStockLock()">
-                            <option value="">Tự động theo tồn kho</option>
-                            <option value="INCOMING">Sắp về hàng (hàng mới sắp ra mắt)</option>
-                        </select>
-                        <div class="form-text text-muted-custom">Chọn "Sắp về hàng" sẽ khoá tồn kho = 0. "Còn / Hết hàng" luôn tự cập nhật theo tồn kho.</div></div>
+                <div id="mainFields">
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">Màu sắc</label><div class="combo" id="comboColor"></div></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Loại dây</label><div class="combo" id="comboString"></div></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Độ căng dây (kg)</label><div class="combo" id="comboTension"></div></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Trọng lượng / Cỡ cán</label><div class="combo" id="comboGrip"></div></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Giá bán (VND)</label>
+                            <div class="money-wrap">
+                                <div class="money-hint"><b>1m</b> = 1 triệu = 1.000.000 ₫ &nbsp;•&nbsp; <b>500k</b> = 500.000 ₫<br>Nhấn <b>Enter</b> để tự quy đổi.</div>
+                                <input type="text" inputmode="decimal" class="form-control" id="vPrice" placeholder="vd: 4.69m hoặc 4690000">
+                            </div></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Tồn kho</label>
+                            <input type="number" class="form-control" id="vStock" min="0" max="1000000" placeholder="10"></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Kiểu giảm giá</label>
+                            <select class="form-select glass-native" id="vDiscType" onchange="document.getElementById('vDiscValue').disabled = !this.value">
+                                <option value="">Không giảm</option><option value="PERCENT">Theo % (PERCENT)</option><option value="FIXED">Số tiền cố định (FIXED)</option>
+                            </select></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Giá trị giảm</label>
+                            <div class="money-wrap">
+                                <div class="money-hint">PERCENT: nhập 0–100. FIXED: số tiền ≤ giá bán, hỗ trợ <b>500k</b> / <b>1m</b>.</div>
+                                <input type="text" inputmode="decimal" class="form-control" id="vDiscValue" disabled>
+                            </div></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Tình trạng</label>
+                            <select class="form-select glass-native" id="vStatus" onchange="syncStockLock()">
+                                <option value="">Tự động theo tồn kho</option>
+                                <option value="INCOMING">Sắp về hàng (hàng mới sắp ra mắt)</option>
+                            </select>
+                            <div class="form-text text-muted-custom">Chọn "Sắp về hàng" sẽ khoá tồn kho = 0. "Còn / Hết hàng" luôn tự cập nhật theo tồn kho.</div></div>
+                    </div>
+                </div>
+
+                <div class="form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" id="quickToggle" onchange="setQuickMode(this.checked)">
+                    <label class="form-check-label text-muted-custom" for="quickToggle">Chế độ thêm nhanh — tạo nhiều biến thể MỚI (không sửa biến thể đang mở)</label>
+                </div>
+                <div id="quickPanel" class="quick-panel mt-3" style="display:none">
+                    <div class="text-muted-custom mb-2">Thông số gốc (áp cho mọi hàng xem trước):</div>
+                    <div class="row">
+                        <div class="col-md-4 mb-2"><label class="form-label">Giá bán (VND)</label>
+                            <input type="text" inputmode="decimal" class="form-control" id="qPrice" onchange="rebuildPreview()" placeholder="vd: 1m"></div>
+                        <div class="col-md-4 mb-2"><label class="form-label">Tồn kho</label>
+                            <input type="number" class="form-control" id="qStock" min="0" max="1000000" onchange="rebuildPreview()"></div>
+                        <div class="col-md-4 mb-2"><label class="form-label">Tình trạng</label>
+                            <select class="form-select glass-native" id="qStatus" onchange="syncQuickStock()">
+                                <option value="">Tự động theo tồn kho</option>
+                                <option value="INCOMING">Sắp về hàng</option>
+                            </select></div>
+                        <div class="col-md-4 mb-2"><label class="form-label">Kiểu giảm giá</label>
+                            <select class="form-select glass-native" id="qDiscType" onchange="document.getElementById('qDiscValue').disabled = !this.value; rebuildPreview()">
+                                <option value="">Không giảm</option><option value="PERCENT">Theo %</option><option value="FIXED">Số tiền cố định</option>
+                            </select></div>
+                        <div class="col-md-4 mb-2"><label class="form-label">Giá trị giảm</label>
+                            <input type="text" inputmode="decimal" class="form-control" id="qDiscValue" disabled onchange="rebuildPreview()"></div>
+                    </div>
+                    <div class="text-muted-custom mb-2 mt-2">Chọn giá trị nhân bản (trục nào để trống = dùng thông số gốc):</div>
+                    <div class="row" id="quickAxes"></div>
+                    <div class="mt-3" id="quickPreviewWrap"></div>
+                    <div class="quick-footer" id="quickFooter" style="display:none">
+                        <span id="quickCounts" class="text-muted-custom"></span>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-glass btn-sm" onclick="setQuickMode(false);document.getElementById('quickToggle').checked=false">Hủy</button>
+                            <button class="btn btn-add btn-sm" id="bulkBtn" onclick="bulkSubmit()"><i class="bi bi-lightning-charge-fill me-1"></i> Thêm hàng loạt</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-glass" data-bs-dismiss="modal">Hủy</button>
-                <button class="btn btn-add" onclick="saveVariant()">Lưu biến thể</button>
+                <button class="btn btn-add" id="saveVariantBtn" onclick="saveVariant()">Lưu biến thể</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Xóa biến thể theo tiêu chí</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6 mb-3"><label class="form-label">Màu sắc</label>
+                        <select id="fColor" class="form-select glass-native" onchange="renderFilterPreview()"></select></div>
+                    <div class="col-6 mb-3"><label class="form-label">Loại dây</label>
+                        <select id="fString" class="form-select glass-native" onchange="renderFilterPreview()"></select></div>
+                    <div class="col-6 mb-3"><label class="form-label">Độ căng dây</label>
+                        <select id="fTension" class="form-select glass-native" onchange="renderFilterPreview()"></select></div>
+                    <div class="col-6 mb-3"><label class="form-label">Trọng lượng / cỡ cán</label>
+                        <select id="fGrip" class="form-select glass-native" onchange="renderFilterPreview()"></select></div>
+                </div>
+                <div class="form-text text-muted-custom mb-2">Các tiêu chí kết hợp bằng VÀ. Để trống = bất kỳ.</div>
+                <div id="filterPreview"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-glass" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-glass-danger" id="filterDeleteBtn" onclick="submitFilterDelete()"><i class="bi bi-trash me-1"></i> Xóa theo tiêu chí</button>
             </div>
         </div>
     </div>
@@ -110,7 +221,7 @@
     <div class="modal-dialog modal-dialog-centered modal-sm">
         <div class="modal-content">
             <div class="modal-body text-center p-4">
-                <i class="bi bi-exclamation-triangle-fill" style="font-size:2.5rem;color:#fbbf24"></i>
+                <i id="confirmIcon" class="bi bi-exclamation-triangle-fill" style="font-size:2.5rem;color:#fbbf24"></i>
                 <p id="confirmMessage" class="mt-3 mb-0 fw-bold"></p>
             </div>
             <div class="modal-footer justify-content-center">
@@ -130,35 +241,44 @@
 
     let products = [], stockMap = {}, variantsCache = {};
     let productModalId = null, variantModalState = { productId: null, variantId: null };
+    let selectMode = false, sortMode = 'newest';
+    const selProducts = new Set(), selVariants = new Set(), openIds = new Set();
+    const variantPage = {}, variantSort = {}, variantOwner = {}, variantStatusFilter = {};
+    const V_PAGE = 8, QUICK_CAP = 40;
+    const STATUS_CYCLE = [null, 'INCOMING', 'AVAILABLE', 'OUT_OF_STOCK'];
+    const STATUS_SHORT = { INCOMING: 'Sắp về', AVAILABLE: 'Còn', OUT_OF_STOCK: 'Hết' };
+    let filterPid = null;
+
+    /* quick-add v2 state */
+    let quickMode = false, rowSeq = 0, quickOver = false;
+    let quickBaseSpecs = null, quickRows = [];
+    const quickSel = { COLOR: new Set(), STRING: new Set(), GRIP: new Set() };
+    const quickTensions = new Set(), quickRemoved = new Set();
+    let quickFrom = 9, quickTo = 12;
+    const quickOptions = { COLOR: [], STRING: [], TENSION: [], GRIP: [] };
+
     const productModal = new bootstrap.Modal(document.getElementById('productModal'));
     const variantModal = new bootstrap.Modal(document.getElementById('variantModal'));
+    const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
     const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
     let confirmResolve = null;
-function stripAccents(s) {
-    return s.normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/đ/g, 'd')
-            .replace(/Đ/g, 'D');
-}
+
+    function stripAccents(s) { return String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D'); }
+    const fold = s => stripAccents(String(s ?? '').trim()).toLowerCase();
+    const specKey = (c, s, t, g) => [c, s, t, g].map(fold).join('|');
+    const ck = r => specKey(r.color, r.stringType, r.tension, r.weightGrip);
     const fmt = n => Number(n || 0).toLocaleString('vi-VN') + ' ₫';
     const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    /* Đọc thông báo lỗi tiếng Việt từ server, không in JSON thô nữa */
-    async function errText(res) {
-        const t = await res.text();
-        try { const j = JSON.parse(t); return j.message || j.error || t; } catch (e) { return t; }
-    }
+    async function errText(res) { const t = await res.text(); try { const j = JSON.parse(t); return j.message || j.error || t; } catch (e) { return t; } }
     const discountLabel = v => !v.discountType ? '—' : (v.discountType === 'PERCENT' ? '-' + v.discountValue + '%' : '-' + fmt(v.discountValue));
-    const finalPrice = v => { if (!v.discountType) return v.price;
-        const p = v.discountType === 'PERCENT' ? v.price * (100 - v.discountValue) / 100 : v.price - v.discountValue;
-        return Math.max(0, Math.round(p)); };
+    const finalPrice = v => { if (!v.discountType) return v.price; const p = v.discountType === 'PERCENT' ? v.price * (100 - v.discountValue) / 100 : v.price - v.discountValue; return Math.max(0, Math.round(p)); };
     const statusOf = v => v.status || (v.stockQuantity > 0 ? 'AVAILABLE' : 'OUT_OF_STOCK');
     const statusBadge = v => {
-        const map = { AVAILABLE: ['Còn hàng', 'rgba(34,197,94,0.25)', '#4ade80'],
-                      OUT_OF_STOCK: ['Hết hàng', 'rgba(239,68,68,0.25)', '#f87171'],
-                      INCOMING: ['Sắp về hàng', 'rgba(59,130,246,0.25)', '#60a5fa'] };
+        const map = { AVAILABLE: ['Còn hàng', 'rgba(34,197,94,0.25)', '#4ade80'], OUT_OF_STOCK: ['Hết hàng', 'rgba(239,68,68,0.25)', '#f87171'], INCOMING: ['Sắp về hàng', 'rgba(59,130,246,0.25)', '#60a5fa'] };
         const [label, bg, fg] = map[statusOf(v)] || map.OUT_OF_STOCK;
         return `<span class="badge" style="background:${bg};color:${fg};border:1px solid ${fg};padding:6px 10px">${label}</span>`;
     };
+    const dateLabel = p => p.createdAt ? new Date(p.createdAt).toLocaleDateString('vi-VN') : '—';
 
     function showToast(message, type) {
         const c = document.getElementById('toast-container');
@@ -170,24 +290,28 @@ function stripAccents(s) {
     }
     function logout() { localStorage.removeItem('loggedInUser'); window.location.href = 'login.html'; }
 
-    function askConfirm(msg) {
+    function askConfirm(msg, opts = {}) {
         document.getElementById('confirmMessage').innerText = msg;
+        const yes = document.getElementById('confirmYes'), icon = document.getElementById('confirmIcon');
+        yes.innerText = opts.text || 'Xóa';
+        yes.className = 'btn ' + (opts.tone === 'add' ? 'btn-add' : 'btn-glass-danger');
+        icon.className = opts.tone === 'add' ? 'bi bi-lightning-charge-fill' : 'bi bi-exclamation-triangle-fill';
+        icon.style.color = opts.tone === 'add' ? '#4ade80' : '#fbbf24';
         confirmModal.show();
         return new Promise(res => { confirmResolve = res; });
     }
     document.getElementById('confirmYes').onclick = () => { const r = confirmResolve; confirmResolve = null; confirmModal.hide(); if (r) r(true); };
     document.getElementById('confirmNo').onclick = () => { const r = confirmResolve; confirmResolve = null; confirmModal.hide(); if (r) r(false); };
     document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => { if (confirmResolve) { const r = confirmResolve; confirmResolve = null; r(false); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && selectMode) toggleSelectMode(false); });
 
     function parseMoney(raw) {
         const s = String(raw || '').trim().toLowerCase().replace(/\s+/g, '').replace(/,/g, '.');
         if (!s) return NaN;
         const m = s.match(/^(\d+(?:\.\d+)?)(m|tr|trieu|triệu|k|nghin|nghìn|ngan|ngàn)?$/);
         if (!m) return NaN;
-        let n = parseFloat(m[1]);
-        const u = m[2];
-        if (u === 'm' || u === 'tr' || u === 'trieu' || u === 'triệu') n *= 1e6;
-        else if (u) n *= 1e3;
+        let n = parseFloat(m[1]); const u = m[2];
+        if (u === 'm' || u === 'tr' || u === 'trieu' || u === 'triệu') n *= 1e6; else if (u) n *= 1e3;
         return Math.round(n);
     }
     function bindMoney(id) {
@@ -196,13 +320,18 @@ function stripAccents(s) {
         el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); normalize(); } });
         el.addEventListener('blur', normalize);
     }
-    ['pPrice', 'vPrice', 'vDiscValue'].forEach(bindMoney);
+    ['pPrice', 'vPrice', 'vDiscValue', 'qPrice', 'qDiscValue'].forEach(bindMoney);
 
     function syncStockLock() {
         const incoming = document.getElementById('vStatus').value === 'INCOMING';
         const stock = document.getElementById('vStock');
-        stock.disabled = incoming;
-        if (incoming) stock.value = 0;
+        stock.disabled = incoming; if (incoming) stock.value = 0;
+    }
+    function syncQuickStock() {
+        const incoming = document.getElementById('qStatus').value === 'INCOMING';
+        const stock = document.getElementById('qStock');
+        stock.disabled = incoming; if (incoming) stock.value = 0;
+        rebuildPreview();
     }
 
     function normalizeCatalogValue(category, raw) {
@@ -223,6 +352,40 @@ function stripAccents(s) {
         return { value: v };
     }
 
+    /* ===== Glass dropdown ===== */
+    function upgradeSelect(sel) {
+        if (sel.dataset.upgraded) { refreshGlassSelect(sel); return; }
+        sel.dataset.upgraded = '1'; sel.style.display = 'none';
+        const wrap = document.createElement('div');
+        wrap.className = 'combo glass-select-wrap';
+        wrap.style.width = sel.dataset.width || '100%';
+        wrap.innerHTML = `<button type="button" class="combo-toggle d-flex justify-content-between align-items-center" onclick="toggleGlassSelect(this)"><span class="gs-label"></span><i class="bi bi-chevron-down"></i></button><div class="combo-panel" style="display:none"></div>`;
+        sel.parentNode.insertBefore(wrap, sel);
+        wrap._sel = sel;
+        refreshGlassSelect(sel);
+    }
+    function refreshGlassSelect(sel) {
+        const wrap = sel.previousSibling;
+        if (!wrap || !wrap._sel) return;
+        const opt = sel.options[sel.selectedIndex];
+        wrap.querySelector('.gs-label').innerHTML = opt ? esc(opt.textContent) : '<span class="text-muted-custom">— Chọn —</span>';
+        wrap.querySelector('.combo-panel').innerHTML = [...sel.options].map((o, i) => `<div class="combo-option" onclick="pickGlassSelect(this, ${i})">${esc(o.textContent)}</div>`).join('');
+    }
+    function toggleGlassSelect(btn) {
+        const panel = btn.parentNode.querySelector('.combo-panel');
+        const wasOpen = panel.style.display !== 'none';
+        closeAllCombos();
+        if (!wasOpen) panel.style.display = '';
+    }
+    function pickGlassSelect(el, idx) {
+        const wrap = el.closest('.combo'), sel = wrap._sel;
+        sel.selectedIndex = idx;
+        sel.dispatchEvent(new Event('change'));
+        refreshGlassSelect(sel);
+        closeAllCombos();
+    }
+
+    /* ===== Combo danh mục ===== */
     const comboState = {};
     const CAT_LABEL = { BRAND: 'thương hiệu', COLOR: 'màu sắc', STRING: 'loại dây', TENSION: 'độ căng dây', GRIP: 'trọng lượng / cỡ cán' };
     function initCombo(key, category, value) { comboState[key] = { category, value: value || '', options: null }; renderCombo(key); }
@@ -230,36 +393,31 @@ function stripAccents(s) {
         const st = comboState[key];
         document.getElementById('combo' + key).innerHTML = `
             <button type="button" class="combo-toggle d-flex justify-content-between align-items-center" onclick="toggleCombo('${key}')">
-                <span>${st.value ? esc(st.value) : '<span class="text-muted-custom">— Chọn —</span>'}</span>
-                <i class="bi bi-chevron-down"></i>
+                <span>${st.value ? esc(st.value) : '<span class="text-muted-custom">— Chọn —</span>'}</span><i class="bi bi-chevron-down"></i>
             </button>
             <div class="combo-panel" id="comboPanel-${key}" style="display:none">
                 <div id="comboList-${key}">Đang tải...</div>
                 <div class="combo-add d-flex gap-2 p-2">
-                    <input type="text" class="form-control form-control-sm" id="comboNew-${key}" placeholder="Thêm giá trị mới..."
-                           onkeydown="if(event.key==='Enter'){event.preventDefault();addOption('${key}');}">
+                    <input type="text" class="form-control form-control-sm" id="comboNew-${key}" placeholder="Thêm giá trị mới..." onkeydown="if(event.key==='Enter'){event.preventDefault();addOption('${key}');}">
                     <button type="button" class="btn btn-sm btn-add py-1 px-2" onclick="addOption('${key}')"><i class="bi bi-plus-lg"></i></button>
                 </div>
             </div>`;
     }
-function closeAllCombos() {
-    document.querySelectorAll('.combo-panel').forEach(p => {
-        if (p.style.display === 'none' || p.classList.contains('combo-closing')) return;
-        p.classList.add('combo-closing');
-        setTimeout(() => { p.style.display = 'none'; p.classList.remove('combo-closing'); }, 150);
-    });
-}
-    document.addEventListener('click', e => { if (!e.target.closest('.combo')) closeAllCombos(); });
-async function toggleCombo(key) {
-    const panel = document.getElementById('comboPanel-' + key);
-    const wasOpen = panel.style.display !== 'none';
-    closeAllCombos();
-    if (!wasOpen) {
-        panel.style.display = '';
-        panel.classList.remove('combo-closing');
-        await loadOptions(key);
+    function closeAllCombos() {
+        document.querySelectorAll('.combo-panel').forEach(p => {
+            if (p.style.display === 'none' || p.classList.contains('combo-closing')) return;
+            p.classList.add('combo-closing');
+            setTimeout(() => { p.style.display = 'none'; p.classList.remove('combo-closing'); }, 150);
+        });
     }
-}
+    document.addEventListener('click', e => { if (!e.target.closest('.combo')) closeAllCombos(); });
+    async function toggleCombo(key) {
+        if (quickMode && ['Color', 'String', 'Tension', 'Grip'].includes(key)) return;
+        const panel = document.getElementById('comboPanel-' + key);
+        const wasOpen = panel.style.display !== 'none';
+        closeAllCombos();
+        if (!wasOpen) { panel.style.display = ''; panel.classList.remove('combo-closing'); await loadOptions(key); }
+    }
     async function loadOptions(key) {
         const st = comboState[key];
         const list = await (await fetch(API + '/catalog/' + st.category)).json();
@@ -271,17 +429,18 @@ async function toggleCombo(key) {
             </div>`).join('') : '<div class="p-2 text-muted-custom">Danh mục trống.</div>';
     }
     function pickOption(key, id) { const st = comboState[key]; st.value = st.options.find(x => x.id === id).optionValue; renderCombo(key); }
-async function addOption(key) {
-    const st = comboState[key];
-    const norm = normalizeCatalogValue(st.category, document.getElementById('comboNew-' + key).value);
-    if (norm.error) { showToast(norm.error, 'error'); return; }
-    const stripped = stripAccents(norm.value).toLowerCase();
-    const clash = (st.options || []).find(o => stripAccents(o.optionValue).toLowerCase() === stripped);
-    if (clash) { showToast('Trùng với "' + clash.optionValue + '" đã có (kể cả viết không dấu)!', 'error'); return; }
-    const res = await fetch(API + '/admin/catalog/' + st.category, { method: 'POST', headers: authHeaders, body: JSON.stringify({ value: norm.value }) });
-    if (res.ok) { showToast('Đã thêm vào danh mục ' + CAT_LABEL[st.category], 'success'); st.value = norm.value; renderCombo(key); }
-    else showToast(await errText(res), 'error');
-}
+    async function addOption(key) {
+        if (quickMode && ['Color', 'String', 'Tension', 'Grip'].includes(key)) return;
+        const st = comboState[key];
+        const norm = normalizeCatalogValue(st.category, document.getElementById('comboNew-' + key).value);
+        if (norm.error) { showToast(norm.error, 'error'); return; }
+        const stripped = stripAccents(norm.value).toLowerCase();
+        const clash = (st.options || []).find(o => stripAccents(o.optionValue).toLowerCase() === stripped);
+        if (clash) { showToast('Trùng với "' + clash.optionValue + '" đã có (kể cả viết không dấu)!', 'error'); return; }
+        const res = await fetch(API + '/admin/catalog/' + st.category, { method: 'POST', headers: authHeaders, body: JSON.stringify({ value: norm.value }) });
+        if (res.ok) { showToast('Đã thêm vào danh mục ' + CAT_LABEL[st.category], 'success'); st.value = norm.value; renderCombo(key); }
+        else showToast(await errText(res), 'error');
+    }
     async function deleteOption(key, id) {
         const st = comboState[key];
         const o = st.options.find(x => x.id === id);
@@ -291,62 +450,182 @@ async function addOption(key) {
         else showToast(await errText(res), 'error');
     }
 
+    /* ===== Bảng sản phẩm ===== */
     async function load() {
         const [pRes, sRes] = await Promise.all([fetch(API + '/product/getAll'), fetch(API + '/product/stock')]);
         products = await pRes.json(); stockMap = await sRes.json();
         variantsCache = {};
         render();
     }
+    function sortedProducts() {
+        const arr = [...products];
+        const t = p => p.createdAt ? new Date(p.createdAt).getTime() : 0;
+        if (sortMode === 'newest') arr.sort((a, b) => t(b) - t(a) || b.id - a.id);
+        else if (sortMode === 'oldest') arr.sort((a, b) => t(a) - t(b) || a.id - b.id);
+        else arr.sort((a, b) => String(a.productName).localeCompare(String(b.productName), 'vi'));
+        return arr;
+    }
     function render() {
+        const cols = (selectMode ? 1 : 0) + 7;
+        document.getElementById('productHead').innerHTML = `<tr>${selectMode ? '<th style="width:36px"></th>' : ''}<th>ID</th><th>Tên sản phẩm</th><th>Thương hiệu</th><th>Giá niêm yết</th><th>Tồn kho</th><th>Ngày tạo</th><th class="text-end">Thao tác</th></tr>`;
         const body = document.getElementById('productBody');
-        if (!products.length) { body.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted-custom">Chưa có sản phẩm nào.</td></tr>'; return; }
-        body.innerHTML = products.map(p => `
-            <tr>
+        const list = sortedProducts();
+        if (!list.length) { body.innerHTML = `<tr><td colspan="${cols}" class="text-center py-5 text-muted-custom">Chưa có sản phẩm nào.</td></tr>`; return; }
+        body.innerHTML = list.map(p => `
+            <tr data-pid="${p.id}" class="${selectMode ? 'selectable' : ''} ${selProducts.has(p.id) ? 'row-selected' : ''}" onclick="rowClickProduct(event, ${p.id})">
+                ${selectMode ? `<td><input type="checkbox" class="form-check-input sel-check" ${selProducts.has(p.id) ? 'checked' : ''} onchange="toggleSelProduct(${p.id}, this.checked)"></td>` : ''}
                 <td class="text-id">#${p.id}</td>
                 <td class="fw-bold" style="font-size: 1.1rem;">${esc(p.productName)}</td>
                 <td class="text-muted-custom">${esc(p.brand || '—')}</td>
                 <td class="text-price">${fmt(p.productPrice)}</td>
-                <td><span class="badge" style="background: rgba(255,255,255,0.2); font-size: 0.9rem; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.3);">${stockMap[p.id] || 0}</span></td>
-                <td class="text-end">
-                    <div class="d-flex gap-2 justify-content-end">
-                        <button class="btn btn-icon" title="Xem biến thể" onclick="toggleVariants(${p.id})"><i class="bi bi-box-seam"></i></button>
-                        <button class="btn btn-icon icon-warn" title="Sửa" onclick="openProductModal(${p.id})"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-icon icon-danger" title="Xóa" onclick="deleteProduct(${p.id})"><i class="bi bi-trash"></i></button>
-                    </div>
-                </td>
+                <td><span class="badge" id="stock-${p.id}" style="background: rgba(255,255,255,0.2); font-size: 0.9rem; padding: 6px 10px; border: 1px solid rgba(255,255,255,0.3);">${stockMap[p.id] || 0}</span></td>
+                <td class="text-muted-custom">${dateLabel(p)}</td>
+                <td class="text-end"><div class="d-flex gap-2 justify-content-end">
+                    <button class="btn btn-icon" title="Xem biến thể" onclick="toggleVariants(${p.id})"><i class="bi bi-box-seam"></i></button>
+                    <button class="btn btn-icon icon-warn" title="Sửa" onclick="openProductModal(${p.id})"><i class="bi bi-pencil"></i></button>
+                    <button class="btn btn-icon icon-danger" title="Xóa" onclick="deleteProduct(${p.id})"><i class="bi bi-trash"></i></button>
+                </div></td>
             </tr>
-            <tr class="detail-row" id="detail-${p.id}" style="display:none"><td colspan="6"><div id="variants-${p.id}"></div></td></tr>
+            <tr class="detail-row" id="detail-${p.id}" style="display:none"><td colspan="${cols}"><div id="variants-${p.id}"></div></td></tr>
         `).join('');
+        openIds.forEach(pid => { const tr = document.getElementById('detail-' + pid); if (tr) { tr.style.display = ''; loadVariants(pid); } });
     }
-async function toggleVariants(pid) {
-    const tr = document.getElementById('detail-' + pid);
-    const box = document.getElementById('variants-' + pid);
-    if (tr.style.display === 'none') {
-        tr.style.display = '';
-        box.classList.remove('detail-close');
-        box.classList.add('detail-open');
-        await loadVariants(pid);
-    } else {
-        box.classList.remove('detail-open');
-        box.classList.add('detail-close');
-        setTimeout(() => { tr.style.display = 'none'; box.classList.remove('detail-close'); }, 180);
+    function rowClickProduct(e, id) { if (!selectMode) return; if (e.target.closest('button, input, a, select, .combo')) return; toggleSelProduct(id, !selProducts.has(id)); }
+    function rowClickVariant(e, id) { if (!selectMode) return; if (e.target.closest('button, input, a, select, .combo')) return; toggleSelVariant(id, !selVariants.has(id)); }
+    function paintSelection() {
+        document.querySelectorAll('tr[data-pid]').forEach(tr => { const id = +tr.dataset.pid; tr.classList.toggle('row-selected', selProducts.has(id)); const cb = tr.querySelector('.sel-check'); if (cb) cb.checked = selProducts.has(id); });
+        document.querySelectorAll('tr[data-vid]').forEach(tr => { const id = +tr.dataset.vid; tr.classList.toggle('row-selected', selVariants.has(id)); const cb = tr.querySelector('.sel-check'); if (cb) cb.checked = selVariants.has(id); });
+        updateSelectionBar();
     }
-}
+    function toggleSelProduct(id, on) { on ? selProducts.add(id) : selProducts.delete(id); paintSelection(); }
+    function toggleSelVariant(id, on) { on ? selVariants.add(id) : selVariants.delete(id); paintSelection(); }
+    function toggleSelectMode(force) {
+        selectMode = force === undefined ? !selectMode : force;
+        if (!selectMode) { selProducts.clear(); selVariants.clear(); }
+        render(); updateSelectionBar();
+    }
+    function updateSelectionBar() {
+        const n = selProducts.size, m = selVariants.size;
+        const bar = document.getElementById('selectionBar');
+        if (!selectMode || (n === 0 && m === 0)) { bar.style.display = 'none'; return; }
+        bar.style.display = 'flex';
+        document.getElementById('selectionCount').innerText = `Đã chọn ${n} sản phẩm, ${m} biến thể`;
+    }
+    async function bulkDelete() {
+        const n = selProducts.size, m = selVariants.size;
+        if (!n && !m) return;
+        const names = [...selProducts].map(id => (products.find(p => p.id === id) || {}).productName).filter(Boolean);
+        const preview = names.slice(0, 5).join(', ') + (names.length > 5 ? ` … (+${names.length - 5})` : '');
+        if (!await askConfirm(`Xóa ${n} sản phẩm${preview ? ` (${preview})` : ''} và ${m} biến thể? Không thể hoàn tác.`)) return;
+        const msg = [];
+        if (n) {
+            const r = await fetch(API + '/admin/product/bulk-delete', { method: 'POST', headers: authHeaders, body: JSON.stringify({ ids: [...selProducts] }) });
+            if (!r.ok) { showToast(await errText(r), 'error'); return; }
+            const j = await r.json(); msg.push(`Đã xóa ${j.deletedProducts} sản phẩm và ${j.deletedVariants} biến thể`); selProducts.clear();
+        }
+        if (m) {
+            const r = await fetch(API + '/admin/product/variant/bulk-delete', { method: 'POST', headers: authHeaders, body: JSON.stringify({ ids: [...selVariants] }) });
+            if (!r.ok) { showToast(await errText(r), 'error'); return; }
+            const j = await r.json(); msg.push(`Đã xóa ${j.deleted} biến thể`); selVariants.clear();
+        }
+        showToast(msg.join(' • '), 'success');
+        openIds.clear(); await load(); updateSelectionBar();
+    }
+
+    async function toggleVariants(pid) {
+        const tr = document.getElementById('detail-' + pid), box = document.getElementById('variants-' + pid);
+        if (tr.style.display === 'none') {
+            openIds.add(pid); tr.style.display = '';
+            box.classList.remove('detail-close'); box.classList.add('detail-open');
+            await loadVariants(pid);
+        } else {
+            openIds.delete(pid);
+            box.classList.remove('detail-open'); box.classList.add('detail-close');
+            setTimeout(() => { if (box.classList.contains('detail-close')) { tr.style.display = 'none'; box.classList.remove('detail-close'); } }, 180);
+        }
+    }
     async function loadVariants(pid) {
         const box = document.getElementById('variants-' + pid);
         box.innerHTML = '<span class="text-muted-custom">Đang tải biến thể...</span>';
         const list = await (await fetch(API + '/product/variants/' + pid)).json();
         variantsCache[pid] = list;
+        list.forEach(v => variantOwner[v.id] = pid);
+        [...selVariants].forEach(id => { if (variantOwner[id] === pid && !list.some(v => v.id === id)) selVariants.delete(id); });
+        renderVariants(pid);
+        updateSelectionBar();
+    }
+    function visibleVariants(pid) {
+        let list = [...(variantsCache[pid] || [])];
+        const f = variantStatusFilter[pid];
+        if (f) list = list.filter(v => statusOf(v) === f);
+        const s = variantSort[pid] || { key: 'createdAt', dir: 'desc' };
+        const val = v => {
+            if (s.key === 'tension') return parseFloat(v.tension) || 0;
+            if (s.key === 'price') return Number(v.price) || 0;
+            if (s.key === 'final') return finalPrice(v);
+            if (s.key === 'stock') return Number(v.stockQuantity) || 0;
+            return v.createdAt ? new Date(v.createdAt).getTime() : 0;
+        };
+        const dir = s.dir === 'asc' ? 1 : -1;
+        list.sort((a, b) => (val(a) - val(b)) * dir || a.id - b.id);
+        return list;
+    }
+    function sortArrow(pid, key) {
+        const s = variantSort[pid];
+        if (s && s.key === key) return s.dir === 'asc' ? ' ▲' : ' ▼';
+        if (key === 'createdAt' && !s) return ' ▼';
+        return '';
+    }
+    function setVariantSort(pid, key) {
+        const s = variantSort[pid];
+        if (s && s.key === key) s.dir = s.dir === 'asc' ? 'desc' : 'asc'; else variantSort[pid] = { key, dir: 'asc' };
+        variantPage[pid] = 1; renderVariants(pid);
+    }
+    function toggleVariantCreatedSort(pid) {
+        const s = variantSort[pid];
+        if (s && s.key === 'createdAt') s.dir = s.dir === 'asc' ? 'desc' : 'asc'; else variantSort[pid] = { key: 'createdAt', dir: 'desc' };
+        variantPage[pid] = 1; renderVariants(pid);
+    }
+    function cycleStatusFilter(pid) {
+        const cur = variantStatusFilter[pid] || null;
+        variantStatusFilter[pid] = STATUS_CYCLE[(STATUS_CYCLE.indexOf(cur) + 1) % STATUS_CYCLE.length];
+        variantPage[pid] = 1; renderVariants(pid);
+    }
+    function changeVariantPage(pid, d) { variantPage[pid] = (variantPage[pid] || 1) + d; renderVariants(pid); }
+    function renderVariants(pid) {
+        const box = document.getElementById('variants-' + pid);
+        if (!box) return;
+        const all = visibleVariants(pid);
+        const total = (variantsCache[pid] || []).length;
+        const f = variantStatusFilter[pid];
+        const pages = Math.max(1, Math.ceil(all.length / V_PAGE));
+        let p = Math.min(variantPage[pid] || 1, pages);
+        variantPage[pid] = p;
+        const list = all.slice((p - 1) * V_PAGE, p * V_PAGE);
         box.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                 <strong style="color:#4ade80; font-size:1.1rem;"><i class="bi bi-list-task me-2"></i>Danh sách biến thể</strong>
-                <button class="btn btn-sm btn-add py-1 px-3" onclick="openVariantModal(${pid}, null)"><i class="bi bi-plus-lg"></i> Thêm</button>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-glass py-1" title="Sắp xếp theo ngày tạo (mới/cũ)" onclick="toggleVariantCreatedSort(${pid})"><i class="bi bi-clock-history me-1"></i>Ngày tạo${sortArrow(pid, 'createdAt')}</button>
+                    <button class="btn btn-sm btn-glass py-1 ${f ? 'status-active' : ''}" title="Lọc theo tình trạng (bấm để đổi)" onclick="cycleStatusFilter(${pid})"><i class="bi bi-tags me-1"></i>Tình trạng${f ? ' • ' + STATUS_SHORT[f] : ''}</button>
+                    <button class="btn btn-sm btn-glass py-1" onclick="openFilterModal(${pid})"><i class="bi bi-funnel me-1"></i>Xóa theo tiêu chí</button>
+                    <button class="btn btn-sm btn-add py-1 px-3" onclick="openVariantModal(${pid}, null)"><i class="bi bi-plus-lg"></i> Thêm</button>
+                </div>
             </div>
-            ${list.length ? `<table class="table table-sm table-borderless" style="background: transparent; margin-bottom: 0;">
+            ${all.length ? `<table class="table table-sm table-borderless" style="background: transparent; margin-bottom: 0;">
                 <thead><tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                    <th>Màu</th><th>Dây</th><th>Độ căng</th><th>Cán</th><th>Giá gốc</th><th>Giảm</th><th>Giá bán</th><th class="text-center">Tồn</th><th>Tình trạng</th><th></th>
+                    ${selectMode ? '<th style="width:36px"></th>' : ''}
+                    <th>Màu</th><th>Dây</th>
+                    <th class="vsort" onclick="setVariantSort(${pid},'tension')">Độ căng${sortArrow(pid, 'tension')}</th>
+                    <th>Cán</th>
+                    <th class="vsort" onclick="setVariantSort(${pid},'price')">Giá gốc${sortArrow(pid, 'price')}</th>
+                    <th>Giảm</th>
+                    <th class="vsort" onclick="setVariantSort(${pid},'final')">Giá bán${sortArrow(pid, 'final')}</th>
+                    <th class="vsort text-center" onclick="setVariantSort(${pid},'stock')">Tồn${sortArrow(pid, 'stock')}</th>
+                    <th>Tình trạng</th><th></th>
                 </tr></thead>
-                <tbody>${list.map(v => `<tr>
+                <tbody>${list.map(v => `<tr data-vid="${v.id}" class="${selectMode ? 'selectable' : ''} ${selVariants.has(v.id) ? 'row-selected' : ''}" onclick="rowClickVariant(event, ${v.id})">
+                    ${selectMode ? `<td><input type="checkbox" class="form-check-input sel-check" ${selVariants.has(v.id) ? 'checked' : ''} onchange="toggleSelVariant(${v.id}, this.checked)"></td>` : ''}
                     <td class="fw-bold">${esc(v.color)}</td><td>${esc(v.stringType)}</td><td>${esc(v.tension)}</td><td>${esc(v.weightGrip)}</td>
                     <td class="text-muted-custom ${v.discountType ? 'text-decoration-line-through' : ''}">${fmt(v.price)}</td>
                     <td class="text-danger fw-bold">${discountLabel(v)}</td>
@@ -356,18 +635,88 @@ async function toggleVariants(pid) {
                     <td>
                         <button class="btn btn-icon icon-warn" style="width:32px;height:32px" onclick="openVariantModal(${pid}, ${v.id})"><i class="bi bi-pencil"></i></button>
                         <button class="btn btn-icon icon-danger" style="width:32px;height:32px" onclick="deleteVariant(${pid}, ${v.id})"><i class="bi bi-trash"></i></button>
-                    </td></tr>`).join('')}</tbody></table>`
-            : '<em class="text-muted-custom">Sản phẩm này chưa có biến thể nào.</em>'}`;
+                    </td></tr>`).join('')}</tbody></table>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="text-muted-custom">${f ? `${all.length}/${total}` : total} biến thể • trang ${p}/${pages}</span>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-glass py-1" ${p <= 1 ? 'disabled' : ''} onclick="changeVariantPage(${pid}, -1)"><i class="bi bi-chevron-left"></i></button>
+                    <button class="btn btn-sm btn-glass py-1" ${p >= pages ? 'disabled' : ''} onclick="changeVariantPage(${pid}, 1)"><i class="bi bi-chevron-right"></i></button>
+                </div>
+            </div>`
+            : `<em class="text-muted-custom">${f ? 'Không có biến thể nào ở tình trạng này.' : 'Sản phẩm này chưa có biến thể nào.'}</em>`}`;
     }
 
+    /* ===== Xóa theo tiêu chí ===== */
+    async function openFilterModal(pid) {
+        filterPid = pid;
+        if (!variantsCache[pid]) await loadVariants(pid);
+        const lists = await Promise.all(['COLOR', 'STRING', 'TENSION', 'GRIP'].map(c => fetch(API + '/catalog/' + c).then(r => r.json())));
+        fillSelect('fColor', lists[0]); fillSelect('fString', lists[1]); fillSelect('fTension', lists[2]); fillSelect('fGrip', lists[3]);
+        renderFilterPreview();
+        filterModal.show();
+    }
+    function fillSelect(id, list) {
+        const sel = document.getElementById(id);
+        sel.innerHTML = '<option value="">— Bất kỳ —</option>' + list.map(o => `<option value="${esc(o.optionValue)}">${esc(o.optionValue)}</option>`).join('');
+        refreshGlassSelect(sel);
+    }
+    function filterCriteria() {
+        return { color: document.getElementById('fColor').value || null, stringType: document.getElementById('fString').value || null, tension: document.getElementById('fTension').value || null, weightGrip: document.getElementById('fGrip').value || null };
+    }
+    function filterMatches() {
+        const c = filterCriteria();
+        if (!Object.values(c).some(v => v)) return null;
+        return (variantsCache[filterPid] || []).filter(v =>
+            (!c.color || fold(v.color) === fold(c.color)) && (!c.stringType || fold(v.stringType) === fold(c.stringType)) &&
+            (!c.tension || fold(v.tension) === fold(c.tension)) && (!c.weightGrip || fold(v.weightGrip) === fold(c.weightGrip)));
+    }
+    function renderFilterPreview() {
+        const m = filterMatches(), el = document.getElementById('filterPreview'), btn = document.getElementById('filterDeleteBtn');
+        if (!m) { el.innerHTML = '<span class="text-muted-custom">Chọn ít nhất một tiêu chí.</span>'; btn.disabled = true; return; }
+        if (!m.length) { el.innerHTML = '<span class="text-muted-custom">Không có biến thể nào khớp tiêu chí.</span>'; btn.disabled = true; return; }
+        btn.disabled = false;
+        el.innerHTML = `<div class="text-muted-custom">Sẽ xóa <b style="color:#f87171">${m.length}</b> biến thể:</div>` +
+            m.slice(0, 8).map(v => `<span class="chip skip">${esc(v.color)} · ${esc(v.tension)} · ${esc(v.weightGrip)}</span>`).join('') +
+            (m.length > 8 ? `<span class="text-muted-custom"> … (+${m.length - 8})</span>` : '');
+    }
+    async function submitFilterDelete() {
+        const m = filterMatches();
+        if (!m || !m.length) return;
+        const c = filterCriteria();
+        const desc = [c.color, c.stringType, c.tension, c.weightGrip].filter(Boolean).join(' + ');
+        if (!await askConfirm(`Xóa ${m.length} biến thể khớp: ${desc}? Không thể hoàn tác.`)) return;
+        const res = await fetch(API + '/admin/product/' + filterPid + '/variants/delete-by-filter', { method: 'POST', headers: authHeaders, body: JSON.stringify(c) });
+        if (res.ok) { const j = await res.json(); showToast(`Đã xóa ${j.deleted} biến thể theo tiêu chí`, 'success'); filterModal.hide(); await loadVariants(filterPid); refreshStock(); }
+        else showToast(await errText(res), 'error');
+    }
+
+    /* ===== Sản phẩm ===== */
     function openProductModal(id) {
         productModalId = id;
         const p = id ? products.find(x => x.id === id) : null;
         document.getElementById('productModalTitle').innerText = p ? 'Sửa sản phẩm #' + id : 'Thêm sản phẩm mới';
         document.getElementById('pName').value = p ? p.productName : '';
         document.getElementById('pPrice').value = p ? p.productPrice : '';
+        document.getElementById('cloneBtn').style.display = p ? '' : 'none';
         initCombo('Brand', 'BRAND', p ? p.brand : '');
         productModal.show();
+    }
+    function nextFreeName(base) {
+        const exists = n => products.some(p => fold(p.productName) === fold(n));
+        if (!exists(base)) return base;
+        let i = 2; while (exists(base + ' ' + i)) i++;
+        return base + ' ' + i;
+    }
+    function cloneProduct() {
+        const src = products.find(p => p.id === productModalId);
+        if (!src) return;
+        productModalId = null;
+        document.getElementById('productModalTitle').innerText = 'Nhân bản — sẽ lưu thành sản phẩm MỚI';
+        document.getElementById('pName').value = nextFreeName(src.productName);
+        document.getElementById('pPrice').value = src.productPrice;
+        document.getElementById('cloneBtn').style.display = 'none';
+        initCombo('Brand', 'BRAND', src.brand || '');
+        showToast('Đã điền sẵn từ sản phẩm #' + src.id + ' — kiểm tra tên rồi lưu', 'success');
     }
     async function saveProduct() {
         const price = parseMoney(document.getElementById('pPrice').value);
@@ -375,8 +724,7 @@ async function toggleVariants(pid) {
         if (!name) { showToast('Tên sản phẩm không được để trống!', 'error'); return; }
         if (isNaN(price) || price <= 0) { showToast('Giá không hợp lệ (vd: 1m, 500k, 1000000)!', 'error'); return; }
         const body = { productName: name, productPrice: price, brand: comboState.Brand.value || null, variants: [] };
-        const res = await fetch(productModalId ? API + '/admin/product/' + productModalId : API + '/admin/product/create',
-            { method: productModalId ? 'PUT' : 'POST', headers: authHeaders, body: JSON.stringify(body) });
+        const res = await fetch(productModalId ? API + '/admin/product/' + productModalId : API + '/admin/product/create', { method: productModalId ? 'PUT' : 'POST', headers: authHeaders, body: JSON.stringify(body) });
         if (res.ok) { showToast(productModalId ? 'Cập nhật sản phẩm thành công' : 'Tạo sản phẩm thành công', 'success'); productModal.hide(); load(); }
         else showToast(await errText(res), 'error');
     }
@@ -384,9 +732,10 @@ async function toggleVariants(pid) {
         const p = products.find(x => x.id === id);
         if (!await askConfirm(`Xóa sản phẩm "${p.productName}"? Toàn bộ biến thể của nó cũng sẽ bị xóa.`)) return;
         const res = await fetch(API + '/admin/product/' + id, { method: 'DELETE', headers: authHeaders });
-        if (res.ok) { showToast('Đã xóa sản phẩm', 'success'); load(); } else showToast(await errText(res), 'error');
+        if (res.ok) { showToast('Đã xóa sản phẩm', 'success'); openIds.delete(id); load(); } else showToast(await errText(res), 'error');
     }
 
+    /* ===== Biến thể: single ===== */
     function openVariantModal(pid, vid) {
         variantModalState = { productId: pid, variantId: vid };
         const v = vid ? (variantsCache[pid] || []).find(x => x.id === vid) : null;
@@ -401,42 +750,269 @@ async function toggleVariants(pid) {
         document.getElementById('vDiscValue').disabled = !(v && v.discountType);
         document.getElementById('vDiscValue').value = v && v.discountValue != null ? v.discountValue : '';
         document.getElementById('vStatus').value = v && v.status === 'INCOMING' ? 'INCOMING' : '';
+        refreshGlassSelect(document.getElementById('vDiscType'));
+        refreshGlassSelect(document.getElementById('vStatus'));
         syncStockLock();
+        document.getElementById('quickToggle').checked = false;
+        setQuickMode(false);
         variantModal.show();
+    }
+    function baseFromModal() {
+        const discType = document.getElementById('vDiscType').value || null;
+        const incoming = document.getElementById('vStatus').value === 'INCOMING';
+        return { color: comboState.Color.value, stringType: comboState.String.value, tension: comboState.Tension.value, weightGrip: comboState.Grip.value,
+            price: parseMoney(document.getElementById('vPrice').value), stockQuantity: incoming ? 0 : Number(document.getElementById('vStock').value || 0),
+            discountType: discType, discountValue: discType === 'PERCENT' ? Number(document.getElementById('vDiscValue').value) : parseMoney(document.getElementById('vDiscValue').value),
+            status: incoming ? 'INCOMING' : null };
+    }
+    function validateVariantRow(b, label) {
+        if (!b.color || !b.stringType || !b.tension || !b.weightGrip) { showToast(label + ': chọn đủ màu, dây, độ căng, cỡ cán!', 'error'); return false; }
+        if (isNaN(b.price) || b.price <= 0) { showToast(label + ': giá bán không hợp lệ!', 'error'); return false; }
+        if (!Number.isInteger(b.stockQuantity) || b.stockQuantity < 0 || b.stockQuantity > 1000000) { showToast(label + ': tồn kho không hợp lệ!', 'error'); return false; }
+        if (b.discountType && (isNaN(b.discountValue) || b.discountValue < 0)) { showToast(label + ': giá trị giảm không hợp lệ!', 'error'); return false; }
+        if (b.discountType === 'PERCENT' && b.discountValue > 100) { showToast(label + ': giảm % không được vượt quá 100!', 'error'); return false; }
+        if (b.discountType === 'FIXED' && b.discountValue > b.price) { showToast(label + ': giảm cố định không được vượt quá giá bán!', 'error'); return false; }
+        return true;
     }
     async function saveVariant() {
         const { productId, variantId } = variantModalState;
-        const discType = document.getElementById('vDiscType').value || null;
-        const price = parseMoney(document.getElementById('vPrice').value);
-        const discValue = discType === 'PERCENT' ? Number(document.getElementById('vDiscValue').value) : parseMoney(document.getElementById('vDiscValue').value);
-        const incoming = document.getElementById('vStatus').value === 'INCOMING';
-        const stock = incoming ? 0 : Number(document.getElementById('vStock').value || 0);
-        if (!comboState.Color.value || !comboState.String.value || !comboState.Tension.value || !comboState.Grip.value) { showToast('Chọn đủ màu, dây, độ căng, cỡ cán từ danh mục!', 'error'); return; }
-        if (isNaN(price) || price <= 0) { showToast('Giá bán không hợp lệ (vd: 4.69m, 500k)!', 'error'); return; }
-        if (!Number.isInteger(stock) || stock < 0) { showToast('Tồn kho phải là số nguyên ≥ 0!', 'error'); return; }
-        if (stock > 1000000) { showToast('Tồn kho tối đa 1.000.000!', 'error'); return; }
-        if (discType && (isNaN(discValue) || discValue < 0)) { showToast('Giá trị giảm không hợp lệ!', 'error'); return; }
-        if (discType === 'PERCENT' && discValue > 100) { showToast('Giảm % không được vượt quá 100!', 'error'); return; }
-        if (discType === 'FIXED' && discValue > price) { showToast('Giảm cố định không được vượt quá giá bán!', 'error'); return; }
-        const body = { color: comboState.Color.value, stringType: comboState.String.value, tension: comboState.Tension.value,
-            weightGrip: comboState.Grip.value, price, stockQuantity: stock,
-            discountType: discType, discountValue: discType ? discValue : null, status: incoming ? 'INCOMING' : null };
-        const res = await fetch(variantId ? API + '/admin/product/variant/' + variantId : API + '/admin/product/' + productId + '/variant',
-            { method: variantId ? 'PUT' : 'POST', headers: authHeaders, body: JSON.stringify(body) });
+        const b = baseFromModal();
+        if (!validateVariantRow(b, 'Biến thể')) return;
+        const res = await fetch(variantId ? API + '/admin/product/variant/' + variantId : API + '/admin/product/' + productId + '/variant', { method: variantId ? 'PUT' : 'POST', headers: authHeaders, body: JSON.stringify(b) });
         if (res.ok) { showToast('Lưu biến thể thành công', 'success'); variantModal.hide(); await loadVariants(productId); refreshStock(); }
         else showToast(await errText(res), 'error');
     }
     async function deleteVariant(pid, vid) {
         if (!await askConfirm('Xóa biến thể này?')) return;
         const res = await fetch(API + '/admin/product/variant/' + vid, { method: 'DELETE', headers: authHeaders });
-        if (res.ok) { showToast('Đã xóa biến thể', 'success'); await loadVariants(pid); refreshStock(); }
+        if (res.ok) { showToast('Đã xóa biến thể', 'success'); selVariants.delete(vid); await loadVariants(pid); refreshStock(); }
         else showToast(await errText(res), 'error');
     }
-    async function refreshStock() { stockMap = await (await fetch(API + '/product/stock')).json(); render(); }
+    async function refreshStock() {
+        stockMap = await (await fetch(API + '/product/stock')).json();
+        products.forEach(p => { const el = document.getElementById('stock-' + p.id); if (el) el.innerText = stockMap[p.id] || 0; });
+    }
 
+    /* ===== QUICK-ADD v2 ===== */
+    function lockMainFields(on) {
+        ['comboColor', 'comboString', 'comboTension', 'comboGrip'].forEach(id => document.getElementById(id).classList.toggle('combo-locked', on));
+        ['vPrice', 'vStock', 'vDiscValue'].forEach(id => document.getElementById(id).disabled = on);
+        ['vDiscType', 'vStatus'].forEach(id => {
+            const sel = document.getElementById(id);
+            sel.disabled = on;
+            const wrap = sel.previousSibling;
+            if (wrap && wrap._sel) wrap.classList.toggle('field-locked', on);
+        });
+        document.getElementById('saveVariantBtn').style.display = on ? 'none' : '';
+    }
+    async function setQuickMode(on) {
+        if (on) {
+            const specs = { color: comboState.Color.value, stringType: comboState.String.value, tension: comboState.Tension.value, weightGrip: comboState.Grip.value };
+            if (!specs.color || !specs.stringType || !specs.tension || !specs.weightGrip) {
+                showToast('Hãy chọn đủ 4 thông số gốc trước khi bật thêm nhanh!', 'error');
+                document.getElementById('quickToggle').checked = false;
+                return;
+            }
+            quickBaseSpecs = specs;
+            document.getElementById('qPrice').value = document.getElementById('vPrice').value;
+            document.getElementById('qStock').value = document.getElementById('vStock').value;
+            document.getElementById('qDiscType').value = document.getElementById('vDiscType').value;
+            document.getElementById('qDiscValue').disabled = !document.getElementById('vDiscType').value;
+            document.getElementById('qDiscValue').value = document.getElementById('vDiscValue').value;
+            document.getElementById('qStatus').value = document.getElementById('vStatus').value;
+            refreshGlassSelect(document.getElementById('qDiscType'));
+            refreshGlassSelect(document.getElementById('qStatus'));
+            syncQuickStock();
+            Object.values(quickSel).forEach(s => s.clear());
+            quickTensions.clear(); quickRemoved.clear();
+            const v = variantModalState.variantId ? (variantsCache[variantModalState.productId] || []).find(x => x.id === variantModalState.variantId) : null;
+            if (v) { quickSel.COLOR.add(v.color); quickSel.STRING.add(v.stringType); quickSel.GRIP.add(v.weightGrip); quickTensions.add(v.tension); quickFrom = quickTo = parseFloat(v.tension) || 9; }
+            const lists = await Promise.all(['COLOR', 'STRING', 'TENSION', 'GRIP'].map(c => fetch(API + '/catalog/' + c).then(r => r.json())));
+            quickOptions.COLOR = lists[0]; quickOptions.STRING = lists[1]; quickOptions.TENSION = lists[2]; quickOptions.GRIP = lists[3];
+            if (!v) { quickFrom = 9; quickTo = 12; syncTensionSet(); }
+        }
+        quickMode = on;
+        lockMainFields(on);
+        document.getElementById('quickPanel').style.display = on ? '' : 'none';
+        if (on) { renderQuickAxes(); rebuildPreview(); }
+    }
+    function syncTensionSet() {
+        quickTensions.clear();
+        quickOptions.TENSION.forEach(o => { const n = parseFloat(o.optionValue); if (n >= quickFrom && n <= quickTo) quickTensions.add(o.optionValue); });
+    }
+    function setQuickBound(which, raw) {
+        let n = parseFloat(raw); if (isNaN(n)) n = 8;
+        n = Math.min(16, Math.max(8, Math.round(n * 2) / 2));
+        if (which === 'from') { quickFrom = n; if (quickTo < n) quickTo = n; } else { quickTo = n; if (quickFrom > n) quickFrom = n; }
+        syncTensionSet(); renderQuickAxes(); rebuildPreview();
+    }
+    function stepQuick(which, d) { setQuickBound(which, (which === 'from' ? quickFrom : quickTo) + d); }
+    function quickToggleValue(axis, id, on) {
+        const o = quickOptions[axis].find(x => x.id === id);
+        on ? quickSel[axis].add(o.optionValue) : quickSel[axis].delete(o.optionValue);
+        rebuildPreview();
+    }
+    function quickSelectAll(axis, on) {
+        quickOptions[axis].forEach(o => on ? quickSel[axis].add(o.optionValue) : quickSel[axis].delete(o.optionValue));
+        renderQuickAxes(); rebuildPreview();
+    }
+    function renderQuickAxes() {
+        const box = document.getElementById('quickAxes');
+        const block = (axis, label) => `
+            <div class="col-md-6 mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label mb-0">${label}</label>
+                    <div class="d-flex gap-1">
+                        <button type="button" class="btn btn-sm btn-glass py-0 px-2" onclick="quickSelectAll('${axis}', true)">Tất cả</button>
+                        <button type="button" class="btn btn-sm btn-glass py-0 px-2" onclick="quickSelectAll('${axis}', false)">Bỏ</button>
+                    </div>
+                </div>
+                <div class="quick-list">${quickOptions[axis].map(o => `
+                    <label class="quick-item"><input type="checkbox" class="form-check-input sel-check" ${quickSel[axis].has(o.optionValue) ? 'checked' : ''} onchange="quickToggleValue('${axis}', ${o.id}, this.checked)"><span>${esc(o.optionValue)}</span></label>`).join('')}</div>
+            </div>`;
+        box.innerHTML = block('COLOR', 'Màu sắc') + block('STRING', 'Loại dây') + block('GRIP', 'Trọng lượng / cỡ cán') + `
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Độ căng dây (khoảng)</label>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    <div class="stepper"><button type="button" onclick="stepQuick('from', -0.5)">−</button><input type="number" step="0.5" min="8" max="16" value="${quickFrom}" onchange="setQuickBound('from', this.value)"><button type="button" onclick="stepQuick('from', 0.5)">+</button></div>
+                    <span class="text-muted-custom">→</span>
+                    <div class="stepper"><button type="button" onclick="stepQuick('to', -0.5)">−</button><input type="number" step="0.5" min="8" max="16" value="${quickTo}" onchange="setQuickBound('to', this.value)"><button type="button" onclick="stepQuick('to', 0.5)">+</button></div>
+                </div>
+                <div class="mt-1">${[...quickTensions].map(t => `<span class="chip">${esc(t)}</span>`).join('') || '<span class="text-muted-custom">Không có giá trị danh mục trong khoảng</span>'}</div>
+            </div>`;
+    }
+    function readQuickBase() {
+        const discType = document.getElementById('qDiscType').value || null;
+        const incoming = document.getElementById('qStatus').value === 'INCOMING';
+        return { price: parseMoney(document.getElementById('qPrice').value), stockQuantity: incoming ? 0 : Number(document.getElementById('qStock').value || 0),
+            discountType: discType, discountValue: discType === 'PERCENT' ? Number(document.getElementById('qDiscValue').value) : parseMoney(document.getElementById('qDiscValue').value),
+            status: incoming ? 'INCOMING' : null };
+    }
+    function rebuildPreview() {
+        if (!quickMode) return;
+        const base = readQuickBase();
+        const axes = {
+            COLOR: quickSel.COLOR.size ? [...quickSel.COLOR] : [quickBaseSpecs.color],
+            STRING: quickSel.STRING.size ? [...quickSel.STRING] : [quickBaseSpecs.stringType],
+            TENSION: quickTensions.size ? [...quickTensions] : [quickBaseSpecs.tension],
+            GRIP: quickSel.GRIP.size ? [...quickSel.GRIP] : [quickBaseSpecs.weightGrip]
+        };
+        const count = axes.COLOR.length * axes.STRING.length * axes.TENSION.length * axes.GRIP.length;
+        const wrap = document.getElementById('quickPreviewWrap');
+        const footer = document.getElementById('quickFooter');
+        if (count > QUICK_CAP) {
+            quickOver = true; quickRows = [];
+            wrap.innerHTML = `<div class="text-muted-custom mt-2">Tổ hợp hiện tại = <b style="color:#f87171">${count}</b> biến thể — vượt trần ${QUICK_CAP}. Bớt lựa chọn ở một trục.</div>`;
+            footer.style.display = 'none';
+            return;
+        }
+        quickOver = false;
+        const prev = new Map(quickRows.map(r => [r.key, r]));
+        const rows = [];
+        for (const c of axes.COLOR) for (const s of axes.STRING) for (const t of axes.TENSION) for (const g of axes.GRIP) {
+            const key = specKey(c, s, t, g);
+            if (quickRemoved.has(key)) continue;
+            const old = prev.get(key);
+            rows.push(old ? { ...old } : { _id: ++rowSeq, key, color: c, stringType: s, tension: t, weightGrip: g, price: base.price, stockQuantity: base.stockQuantity });
+        }
+        quickRows = rows;
+        renderPreviewRows();
+        refreshPreviewMeta();
+    }
+    function computeDups() {
+        const pid = variantModalState.productId;
+        const db = new Set((variantsCache[pid] || []).map(v => specKey(v.color, v.stringType, v.tension, v.weightGrip)));
+        const seen = new Set();
+        quickRows.forEach(r => { const k = ck(r); r.dup = db.has(k) || seen.has(k); seen.add(k); });
+    }
+    function renderPreviewRows() {
+        const wrap = document.getElementById('quickPreviewWrap');
+        const base = readQuickBase();
+        const incoming = base.status === 'INCOMING';
+        if (!quickRows.length) {
+            wrap.innerHTML = '<div class="text-muted-custom mt-2">Chưa còn hàng xem trước nào (đã xóa hết hoặc trục trống).</div>';
+            document.getElementById('quickFooter').style.display = 'none';
+            return;
+        }
+        const opt = (axis, cur) => quickOptions[axis].map(o => `<option value="${esc(o.optionValue)}" ${o.optionValue === cur ? 'selected' : ''}>${esc(o.optionValue)}</option>`).join('');
+        wrap.innerHTML = `
+            <div class="text-muted-custom mt-2 mb-1">Bản xem trước — bấm vào ô để sửa từng hàng:</div>
+            <div class="preview-scroll"><table class="table table-sm table-borderless">
+                <thead><tr><th>Màu</th><th>Dây</th><th>Độ căng</th><th>Cán</th><th>Giá</th><th>Tồn</th><th></th><th></th></tr></thead>
+                <tbody>${quickRows.map(r => `<tr>
+                    <td><select class="form-select form-select-sm qspec" onchange="rowEditSpec(${r._id}, 'color', this.value)">${opt('COLOR', r.color)}</select></td>
+                    <td><select class="form-select form-select-sm qspec" onchange="rowEditSpec(${r._id}, 'stringType', this.value)">${opt('STRING', r.stringType)}</select></td>
+                    <td><select class="form-select form-select-sm qspec" onchange="rowEditSpec(${r._id}, 'tension', this.value)">${opt('TENSION', r.tension)}</select></td>
+                    <td><select class="form-select form-select-sm qspec" onchange="rowEditSpec(${r._id}, 'weightGrip', this.value)">${opt('GRIP', r.weightGrip)}</select></td>
+                    <td><input type="text" inputmode="decimal" class="form-control form-control-sm" style="min-width:90px" value="${isNaN(r.price) ? '' : r.price}" onchange="rowEditNum(${r._id}, 'price', this.value)"></td>
+                    <td><input type="number" min="0" max="1000000" class="form-control form-control-sm" style="width:80px" value="${r.stockQuantity}" ${incoming ? 'disabled' : ''} onchange="rowEditNum(${r._id}, 'stockQuantity', this.value)"></td>
+                    <td id="dup-${r._id}"></td>
+                    <td><button type="button" class="btn btn-icon icon-danger" style="width:28px;height:28px" title="Bỏ hàng này" onclick="removeQuickRow(${r._id})"><i class="bi bi-x-lg"></i></button></td>
+                </tr>`).join('')}</tbody></table></div>`;
+        wrap.querySelectorAll('select.qspec').forEach(upgradeSelect);
+        document.getElementById('quickFooter').style.display = 'flex';
+    }
+    function refreshPreviewMeta() {
+        computeDups();
+        const base = readQuickBase();
+        const baseOk = !isNaN(base.price) && base.price > 0;
+        quickRows.forEach(r => {
+            const el = document.getElementById('dup-' + r._id);
+            if (el) el.innerHTML = r.dup ? '<span class="dup-badge">trùng</span>' : '<span class="ok-badge">mới</span>';
+        });
+        const create = quickRows.filter(r => !r.dup).length;
+        const skip = quickRows.length - create;
+        const counts = document.getElementById('quickCounts');
+        const btn = document.getElementById('bulkBtn');
+        if (!baseOk) { counts.innerHTML = '<span style="color:#f87171">Nhập giá bán gốc hợp lệ trước (vd: 1m).</span>'; btn.disabled = true; return; }
+        counts.innerHTML = `Sẽ tạo <b style="color:#4ade80">${create}</b> • bỏ qua <b style="color:#f87171">${skip}</b> trùng • trần ${QUICK_CAP}`;
+        btn.disabled = create === 0 || quickOver;
+    }
+    function rowEditSpec(id, field, value) {
+        const r = quickRows.find(x => x._id === id); if (!r) return;
+        r[field] = value; refreshPreviewMeta();
+    }
+    function rowEditNum(id, field, raw) {
+        const r = quickRows.find(x => x._id === id); if (!r) return;
+        r[field] = field === 'price' ? parseMoney(raw) : Number(raw);
+        refreshPreviewMeta();
+    }
+    function removeQuickRow(id) {
+        const r = quickRows.find(x => x._id === id); if (!r) return;
+        quickRemoved.add(r.key);
+        quickRows = quickRows.filter(x => x._id !== id);
+        renderPreviewRows(); refreshPreviewMeta();
+    }
+    async function bulkSubmit() {
+        const pid = variantModalState.productId;
+        const base = readQuickBase();
+        if (isNaN(base.price) || base.price <= 0) { showToast('Giá bán gốc không hợp lệ!', 'error'); return; }
+        if (!Number.isInteger(base.stockQuantity) || base.stockQuantity < 0 || base.stockQuantity > 1000000) { showToast('Tồn kho gốc không hợp lệ!', 'error'); return; }
+        if (base.discountType && (isNaN(base.discountValue) || base.discountValue < 0)) { showToast('Giá trị giảm không hợp lệ!', 'error'); return; }
+        if (base.discountType === 'PERCENT' && base.discountValue > 100) { showToast('Giảm % không được vượt quá 100!', 'error'); return; }
+        computeDups();
+        const rows = quickRows.filter(r => !r.dup);
+        if (!rows.length) { showToast('Không có hàng mới nào để tạo!', 'error'); return; }
+        for (let i = 0; i < rows.length; i++) {
+            const r = rows[i];
+            const payload = { color: r.color, stringType: r.stringType, tension: r.tension, weightGrip: r.weightGrip, price: r.price, stockQuantity: base.status === 'INCOMING' ? 0 : r.stockQuantity, discountType: base.discountType, discountValue: base.discountType ? base.discountValue : null, status: base.status };
+            if (!validateVariantRow(payload, 'Hàng ' + (i + 1))) return;
+        }
+        const skip = quickRows.length - rows.length;
+        if (!await askConfirm(`Tạo ${rows.length} biến thể mới` + (skip ? ` (bỏ qua ${skip} hàng trùng)` : '') + '?', { text: 'Tạo', tone: 'add' })) return;
+        const payload = rows.map(r => ({ color: r.color, stringType: r.stringType, tension: r.tension, weightGrip: r.weightGrip, price: r.price, stockQuantity: base.status === 'INCOMING' ? 0 : r.stockQuantity, discountType: base.discountType, discountValue: base.discountType ? base.discountValue : null, status: base.status }));
+        const res = await fetch(API + '/admin/product/' + pid + '/variants/bulk-rows', { method: 'POST', headers: authHeaders, body: JSON.stringify({ rows: payload }) });
+        if (res.ok) {
+            const j = await res.json();
+            showToast(`Đã tạo ${j.created} biến thể` + (j.skipped ? `, bỏ qua ${j.skipped} trùng (${j.skippedValues.join('; ')})` : ''), 'success');
+            variantModal.hide();
+            variantPage[pid] = 1; variantSort[pid] = { key: 'createdAt', dir: 'desc' };
+            await loadVariants(pid); refreshStock();
+        } else showToast(await errText(res), 'error');
+    }
+
+    ['sortSelect', 'vDiscType', 'vStatus', 'qDiscType', 'qStatus', 'fColor', 'fString', 'fTension', 'fGrip'].forEach(id => upgradeSelect(document.getElementById(id)));
     load();
 </script>
-
 </body>
-
 </html>
