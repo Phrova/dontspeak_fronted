@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Khuyến mãi - ByQ Store</title>
+    <link rel="icon" type="image/jpeg" href="https://res.cloudinary.com/dvsva8hxi/image/upload/v1794492754/b6ed47bf0e27d8a3e156e487d5f5b255_hbr16j.jpg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="admin-theme.css">
+    <script src="page-transition.js" defer></script>
+    <style>
+        * { scrollbar-width: thin; scrollbar-color: rgba(74,222,128,.5) rgba(0,0,0,.25); }
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,.25); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(74,222,128,.55), rgba(34,197,94,.35)); border-radius: 8px; border: 2px solid rgba(0,0,0,.25); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(74,222,128,.8); }
+        .search-glass { background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.16); color: #fff; border-radius: 14px; padding: 12px 16px; min-width: 220px; box-shadow: inset 0 1px 0 rgba(255,255,255,.2); transition: border-color .15s, box-shadow .15s; }
+        .search-glass::placeholder { color: rgba(255,255,255,.45); }
+        .search-glass:focus { outline: none; border-color: #22c55e; box-shadow: 0 0 0 4px rgba(34,197,94,.22); }
+        .selection-bar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 1070; display: flex; gap: 12px; align-items: center; background: linear-gradient(135deg, rgba(24,24,28,.85), rgba(14,14,18,.8)); backdrop-filter: blur(25px) saturate(170%); border: 1px solid rgba(255,255,255,.2); border-radius: 18px; padding: 12px 18px; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 15px 40px rgba(0,0,0,.5); animation: fadeUpIn .25s var(--ios-ease) backwards; }
+        .sel-check { width: 18px; height: 18px; cursor: pointer; background-color: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.4); }
+        .sel-check:checked { background-color: #22c55e; border-color: #22c55e; }
+        .glass-select-wrap .combo-toggle { font-weight: 700; }
+        .code-badge { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .5px; background: rgba(74,222,128,.14); border: 1px solid rgba(74,222,128,.4); color: #4ade80; border-radius: 10px; padding: 4px 10px; font-weight: 700; }
+        .use-bar { width: 110px; height: 8px; border-radius: 6px; background: rgba(255,255,255,.12); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,.4); }
+        .use-bar i { display: block; height: 100%; border-radius: 6px; transition: width .3s var(--ios-ease); }
+        .status-active { color: #4ade80 !important; }
+        .col-time { text-align: center; }
+        .modal input[type="datetime-local"] { color-scheme: dark; }
+        .preview-box { background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.14); border-radius: 14px; padding: 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
+        .preview-line { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; font-size: .95rem; }
+        .toast-action { background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.4); color: #fff; border-radius: 20px; padding: 4px 14px; font-weight: 700; margin-left: 6px; }
+        .toast-action:hover { background: rgba(0,0,0,.5); color: #fff; }
+        .quick-panel { background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.15); border-radius: 14px; padding: 14px; animation: dropDown .2s var(--ios-spring) backwards; }
+        .quick-item { display: flex; gap: 8px; align-items: center; padding: 6px 8px; border-radius: 8px; cursor: pointer; }
+        .quick-item:hover { background: rgba(74,222,128,.12); }
+        .field-locked { opacity: .45; pointer-events: none; }
+        .preview-scroll { overflow: auto; max-height: 300px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; }
+        .preview-scroll table { margin: 0; min-width: 640px; }
+        .preview-scroll td, .preview-scroll th { padding: 8px 10px; font-size: .9rem; white-space: nowrap; }
+        .quick-footer { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; margin-top: 10px; background: linear-gradient(135deg, rgba(24,24,28,.92), rgba(14,14,18,.9)); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.18); border-radius: 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.2); }
+        .dup-badge { font-size: .75rem; color: #f87171; border: 1px solid rgba(239,68,68,.4); background: rgba(239,68,68,.12); border-radius: 12px; padding: 2px 8px; }
+        .ok-badge { font-size: .75rem; color: #4ade80; border: 1px solid rgba(74,222,128,.4); background: rgba(74,222,128,.12); border-radius: 12px; padding: 2px 8px; }
+        .stepper { display: inline-flex; align-items: center; gap: 6px; }
+        .stepper button { width: 32px; height: 32px; border-radius: 8px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.1); color: #fff; font-weight: 800; }
+        .stepper button:hover { background: rgba(255,255,255,.2); }
+        .stepper input { width: 80px; text-align: center; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.2); color: #fff; border-radius: 8px; padding: 6px; }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"><i id="toast-icon" class="bi bi-check-circle-fill"></i><span id="toast-message"></span><button id="toast-action" class="toast-action" style="display:none"></button></div>
+
+<div class="sidebar">
+    <a href="#" class="sidebar-brand">ByQ Store Admin</a>
+    <a href="admin.html" class="nav-item"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="admin-discounts.html" class="nav-item active"><i class="bi bi-tags-fill"></i> Quản lý Khuyến mãi</a>
+    <a href="admin-products.html" class="nav-item"><i class="bi bi-box-seam-fill"></i> Quản lý Sản phẩm</a>
+    <a href="admin-orders.html" class="nav-item"><i class="bi bi-truck"></i> Quản lý Đơn hàng</a>
+    <div style="position: absolute; bottom: 20px; width: 100%;">
+        <a href="index.html" class="nav-item"><i class="bi bi-shop"></i> Về Cửa hàng</a>
+        <a href="#" onclick="logout()" class="nav-item text-danger"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <h2 style="font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,.3); font-size: 2rem;">Quản lý khuyến mãi</h2>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <input id="searchInput" class="search-glass" placeholder="Tìm mã hoặc tên..." oninput="vSearch=this.value;saveView();vPage=1;render()">
+            <button class="btn btn-glass" id="statusBtn" onclick="cycleStatus()"><i class="bi bi-tags me-1"></i>Tình trạng</button>
+            <select id="sortSelect" class="form-select glass-native" data-width="180px" onchange="vSort=this.value;saveView();vPage=1;render()">
+                <option value="newest">Mới tạo nhất</option>
+                <option value="ending">Sắp hết hạn</option>
+                <option value="value">Giá trị giảm cao</option>
+                <option value="code">Mã A–Z</option>
+            </select>
+            <button class="btn btn-glass" onclick="openFilterModal()"><i class="bi bi-funnel me-1"></i>Xóa theo tiêu chí</button>
+            <button class="btn btn-glass" onclick="toggleSelectMode()"><i class="bi bi-check2-square me-1"></i> Chọn nhiều</button>
+            <button class="btn btn-add" onclick="openModal(null)"><i class="bi bi-plus-circle me-2"></i> Tạo voucher</button>
+        </div>
+    </div>
+    <div class="table-glass">
+        <table class="table">
+            <thead id="vHead"></thead>
+            <tbody id="vBody"><tr><td colspan="9" class="text-center py-5 text-muted-custom">Đang tải dữ liệu...</td></tr></tbody>
+        </table>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-3">
+        <span id="vCount" class="text-muted-custom"></span>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-glass py-1" id="prevBtn" onclick="vPage--;render()"><i class="bi bi-chevron-left"></i></button>
+            <button class="btn btn-sm btn-glass py-1" id="nextBtn" onclick="vPage++;render()"><i class="bi bi-chevron-right"></i></button>
+        </div>
+    </div>
+</div>
+
+<div id="selectionBar" class="selection-bar" style="display:none">
+    <span id="selectionCount" class="fw-bold"></span>
+    <button class="btn btn-glass-danger btn-sm" onclick="bulkDelete()"><i class="bi bi-trash me-1"></i> Xóa mục đã chọn</button>
+    <button class="btn btn-glass btn-sm" onclick="toggleSelectMode(false)">Thoát</button>
+</div>
+
+<div class="modal fade" id="voucherModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title" id="modalTitle">Tạo voucher</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div id="vMainFields">
+                    <div class="row">
+                        <div class="col-md-4 mb-3"><label class="form-label">Mã giảm giá</label>
+                            <input type="text" class="form-control" id="fCode" placeholder="WELCOME50" style="text-transform:uppercase" oninput="renderPreview()" onchange="this.value=this.value.toUpperCase();renderPreview()"></div>
+                        <div class="col-md-8 mb-3"><label class="form-label">Tên chương trình</label>
+                            <input type="text" class="form-control" id="fName" placeholder="Giảm 50.000 ₫ cho đơn đầu tiên" oninput="renderPreview()" onchange="renderPreview()"></div>
+                        <div class="col-12 mb-3"><label class="form-label">Mô tả</label>
+                            <input type="text" class="form-control" id="fDesc" placeholder="Áp dụng cho khách hàng mới, đơn từ 500.000 ₫"></div>
+                        <div class="col-md-4 mb-3"><label class="form-label">Kiểu giảm</label>
+                            <select class="form-select glass-native" id="fType" onchange="document.getElementById('fMax').disabled = this.value==='FIXED';renderPreview()">
+                                <option value="PERCENT">Theo % (PERCENT)</option>
+                                <option value="FIXED">Số tiền cố định (FIXED)</option>
+                            </select></div>
+                        <div class="col-md-4 mb-3"><label class="form-label">Giá trị giảm</label>
+                            <div class="money-wrap"><div class="money-hint">PERCENT: 1–100. FIXED: số tiền, hỗ trợ <b>50k</b> / <b>1m</b>.</div>
+                            <input type="text" inputmode="decimal" class="form-control" id="fValue" oninput="renderPreview()" onchange="renderPreview()"></div></div>
+                        <div class="col-md-4 mb-3"><label class="form-label">Giảm tối đa (PERCENT)</label>
+                            <div class="money-wrap"><div class="money-hint">Trần số tiền được giảm. Để trống = không trần.</div>
+                            <input type="text" inputmode="decimal" class="form-control" id="fMax" oninput="renderPreview()" onchange="renderPreview()"></div></div>
+                        <div class="col-md-4 mb-3"><label class="form-label">Đơn tối thiểu (VND)</label>
+                            <input type="text" inputmode="decimal" class="form-control" id="fMin" oninput="renderPreview()" onchange="renderPreview()"></div>
+                        <div class="col-md-4 mb-3"><label class="form-label">Số lượt phát hành</label>
+                            <input type="number" class="form-control" id="fQty" min="1" max="100000" oninput="renderPreview()" onchange="renderPreview()"></div>
+                        <div class="col-md-4 mb-3"><label class="form-label">Đã dùng</label>
+                            <input type="text" class="form-control" id="fUsed" disabled value="0"></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Bắt đầu</label>
+                            <input type="datetime-local" class="form-control" id="fStart" oninput="renderPreview()" onchange="renderPreview()"></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Kết thúc</label>
+                            <input type="datetime-local" class="form-control" id="fEnd" oninput="renderPreview()" onchange="renderPreview()"></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Công tắc tay</label>
+                            <select class="form-select glass-native" id="fManual" oninput="renderPreview()" onchange="renderPreview()">
+                                <option value="ACTIVE">Bật (ACTIVE)</option>
+                                <option value="INACTIVE">Ngừng (INACTIVE)</option>
+                            </select>
+                            <div class="form-text text-muted-custom">Sắp diễn ra / Hết hạn / Hết lượt luôn TỰ tính theo thời gian và lượt dùng.</div></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Phạm vi áp dụng</label>
+                            <select class="form-select glass-native" id="fScope">
+                                <option value="ORDER">ORDER — khách nhập mã khi checkout</option>
+                                <option value="ITEM">ITEM — gắn cho biến thể sản phẩm</option>
+                            </select>
+                            <div class="form-text text-muted-custom">Mã ITEM không nhập tay được ở checkout; chỉ gắn qua quản lý sản phẩm.</div></div>
+                    </div>
+                </div>
+
+                <div class="form-check form-switch mt-2">
+                    <input class="form-check-input" type="checkbox" id="quickToggle" onchange="setQuickMode(this.checked)">
+                    <label class="form-check-label text-muted-custom" for="quickToggle">Chế độ thêm nhanh — tạo nhiều mã cùng lúc (không sửa voucher đang mở)</label>
+                </div>
+                <div id="quickPanel" class="quick-panel mt-3" style="display:none">
+                    <div class="text-muted-custom mb-2">Cách sinh mã:</div>
+                    <div class="d-flex gap-3 flex-wrap mb-2">
+                        <label class="quick-item"><input type="radio" name="qgen" class="form-check-input" checked onchange="qGen='range';renderQuickGen();rebuildQuick()"> Đánh số theo khoảng</label>
+                        <label class="quick-item"><input type="radio" name="qgen" class="form-check-input" onchange="qGen='list';renderQuickGen();rebuildQuick()"> Dán danh sách mã</label>
+                    </div>
+                    <div id="quickGen"></div>
+                    <div id="quickPreviewWrap" class="mt-3"></div>
+                    <div class="quick-footer" id="quickFooter" style="display:none">
+                        <span id="quickCounts" class="text-muted-custom"></span>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-glass btn-sm" onclick="setQuickMode(false);document.getElementById('quickToggle').checked=false">Hủy</button>
+                            <button class="btn btn-add btn-sm" id="bulkBtn" onclick="bulkSubmit()"><i class="bi bi-lightning-charge-fill me-1"></i> Thêm hàng loạt</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="preview-box mt-3">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                        <strong style="color:#4ade80"><i class="bi bi-receipt me-1"></i>Xem trước áp dụng</strong>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted-custom">Đơn thử:</span>
+                            <input type="text" inputmode="decimal" class="form-control form-control-sm" style="width:130px" id="pSubtotal" value="1500000" oninput="renderPreview()" onchange="renderPreview()">
+                        </div>
+                    </div>
+                    <div id="previewOut"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-glass" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-add" id="saveBtn" onclick="save()"><i class="bi bi-check2-circle me-1"></i> Lưu voucher</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Xóa voucher theo tiêu chí</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-6 mb-3"><label class="form-label">Kiểu giảm</label>
+                        <select id="dfType" class="form-select glass-native" onchange="renderFilterPreview()">
+                            <option value="">— Bất kỳ —</option><option value="PERCENT">Theo %</option><option value="FIXED">Số tiền cố định</option>
+                        </select></div>
+                    <div class="col-6 mb-3"><label class="form-label">Tình trạng hiệu lực</label>
+                        <select id="dfStatus" class="form-select glass-native" onchange="renderFilterPreview()">
+                            <option value="">— Bất kỳ —</option>
+                            <option value="ACTIVE">Đang chạy</option><option value="SCHEDULED">Sắp diễn ra</option>
+                            <option value="EXPIRED">Hết hạn</option><option value="USED_UP">Hết lượt</option><option value="INACTIVE">Ngừng</option>
+                        </select></div>
+                    <div class="col-12 mb-3"><label class="form-label">Kết thúc trước ngày</label>
+                        <input type="datetime-local" class="form-control" id="dfEnd" onchange="renderFilterPreview()"></div>
+                </div>
+                <div class="form-text text-muted-custom mb-2">Các tiêu chí kết hợp bằng VÀ. Để trống = bất kỳ. Xóa mềm — hoàn tác được.</div>
+                <div id="dfPreview"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-glass" data-bs-dismiss="modal">Hủy</button>
+                <button class="btn btn-glass-danger" id="dfBtn" onclick="submitFilterDelete()"><i class="bi bi-trash me-1"></i> Xóa theo tiêu chí</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-body text-center p-4">
+                <i id="confirmIcon" class="bi bi-exclamation-triangle-fill" style="font-size:2.5rem;color:#fbbf24"></i>
+                <p id="confirmMessage" class="mt-3 mb-0 fw-bold"></p>
+            </div>
+            <div class="modal-footer justify-content-center">
+                <button class="btn btn-glass" id="confirmNo">Hủy</button>
+                <button class="btn btn-glass-danger" id="confirmYes">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const API = 'http://localhost:8080';
+    const me = JSON.parse(localStorage.getItem('loggedInUser'));
+    if (!me || me.role !== 'ADMIN') { alert('Bạn không có quyền truy cập trang này!'); window.location.href = 'login.html'; }
+    const authHeaders = { 'Content-Type': 'application/json', 'X-User-Id': me.id };
+
+    let vouchers = [], vPage = 1, selectMode = false, editId = null, lastDeleted = [];
+    const sel = new Set();
+    const PAGE = 8, QUICK_CAP = 40;
+    const STATUS_CYCLE = [null, 'ACTIVE', 'SCHEDULED', 'EXPIRED', 'USED_UP', 'INACTIVE'];
+    const STATUS_META = {
+        ACTIVE: ['Đang chạy', 'rgba(34,197,94,0.25)', '#4ade80'],
+        SCHEDULED: ['Sắp diễn ra', 'rgba(59,130,246,0.25)', '#60a5fa'],
+        EXPIRED: ['Hết hạn', 'rgba(148,163,184,0.2)', '#94a3b8'],
+        USED_UP: ['Hết lượt', 'rgba(251,191,36,0.22)', '#fbbf24'],
+        INACTIVE: ['Ngừng', 'rgba(239,68,68,0.2)', '#f87171']
+    };
+    let vSearch = '', vStatus = null, vSort = 'newest';
+    try { const sv = JSON.parse(localStorage.getItem('byq_voucher_view') || '{}'); vSearch = sv.q || ''; vStatus = sv.s || null; vSort = sv.o || 'newest'; } catch (e) {}
+
+    let quickMode = false, qBase = null, qGen = 'range', qPrefix = 'MA', qFrom = 1, qTo = 5, qList = '', qRows = [], qSeq = 0;
+    const qRemoved = new Set();
+
+    const modal = new bootstrap.Modal(document.getElementById('voucherModal'));
+    const filterModal = new bootstrap.Modal(document.getElementById('filterModal'));
+    const confirmModal = new bootstrap.Modal(document.getElementById('confirmModal'));
+    let confirmResolve = null, toastTimer = null, toastActionFn = null;
+
+    const stripAccents = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+    const fold = s => stripAccents(String(s ?? '').trim()).toLowerCase();
+    const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const fmt = n => Number(n || 0).toLocaleString('vi-VN') + ' ₫';
+    async function errText(res) { const t = await res.text(); try { const j = JSON.parse(t); return j.message || j.error || t; } catch (e) { return t; } }
+    const dLabel = d => d ? new Date(d).toLocaleString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+    const dInput = d => d ? String(d).slice(0, 16) : '';
+
+    function parseMoney(raw) {
+        const s = String(raw || '').trim().toLowerCase().replace(/\s+/g, '').replace(/,/g, '.');
+        if (!s) return NaN;
+        const m = s.match(/^(\d+(?:\.\d+)?)(m|tr|trieu|triệu|k|nghin|nghìn|ngan|ngàn)?$/);
+        if (!m) return NaN;
+        let n = parseFloat(m[1]); const u = m[2];
+        if (u === 'm' || u === 'tr' || u === 'trieu' || u === 'triệu') n *= 1e6; else if (u) n *= 1e3;
+        return Math.round(n);
+    }
+    ['fValue', 'fMax', 'fMin', 'pSubtotal'].forEach(id => {
+        const el = document.getElementById(id);
+        const norm = () => { const n = parseMoney(el.value); if (!isNaN(n)) el.value = n; };
+        el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); norm(); renderPreview(); } });
+        el.addEventListener('blur', norm);
+    });
+
+    function showToast(message, type, action) {
+        const c = document.getElementById('toast-container');
+        document.getElementById('toast-message').innerText = message;
+        document.getElementById('toast-icon').className = type === 'success' ? 'bi bi-check-circle-fill' : 'bi bi-x-circle-fill';
+        const btn = document.getElementById('toast-action');
+        toastActionFn = action ? action.fn : null;
+        if (action) { btn.style.display = ''; btn.innerText = action.label; } else btn.style.display = 'none';
+        c.className = type === 'success' ? 'toast-success' : 'toast-error';
+        clearTimeout(toastTimer);
+        setTimeout(() => c.classList.add('show'), 10);
+        toastTimer = setTimeout(() => c.classList.remove('show'), action ? 6000 : 3500);
+    }
+    document.getElementById('toast-action').onclick = () => { const f = toastActionFn; toastActionFn = null; document.getElementById('toast-container').classList.remove('show'); if (f) f(); };
+    function logout() { localStorage.removeItem('loggedInUser'); window.location.href = 'login.html'; }
+
+    function askConfirm(msg, opts = {}) {
+        document.getElementById('confirmMessage').innerText = msg;
+        const yes = document.getElementById('confirmYes'), icon = document.getElementById('confirmIcon');
+        yes.innerText = opts.text || 'Xóa';
+        yes.className = 'btn ' + (opts.tone === 'add' ? 'btn-add' : 'btn-glass-danger');
+        icon.className = opts.tone === 'add' ? 'bi bi-lightning-charge-fill' : 'bi bi-exclamation-triangle-fill';
+        icon.style.color = opts.tone === 'add' ? '#4ade80' : '#fbbf24';
+        confirmModal.show();
+        return new Promise(res => { confirmResolve = res; });
+    }
+    document.getElementById('confirmYes').onclick = () => { const r = confirmResolve; confirmResolve = null; confirmModal.hide(); if (r) r(true); };
+    document.getElementById('confirmNo').onclick = () => { const r = confirmResolve; confirmResolve = null; confirmModal.hide(); if (r) r(false); };
+    document.getElementById('confirmModal').addEventListener('hidden.bs.modal', () => { if (confirmResolve) { const r = confirmResolve; confirmResolve = null; r(false); } });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && selectMode) toggleSelectMode(false); });
+
+    function upgradeSelect(s) {
+        if (s.dataset.upgraded) { refreshGlassSelect(s); return; }
+        s.dataset.upgraded = '1'; s.style.display = 'none';
+        const w = document.createElement('div');
+        w.className = 'combo glass-select-wrap'; w.style.width = s.dataset.width || '100%';
+        w.innerHTML = `<button type="button" class="combo-toggle d-flex justify-content-between align-items-center" onclick="toggleGlassSelect(this)"><span class="gs-label"></span><i class="bi bi-chevron-down"></i></button><div class="combo-panel" style="display:none"></div>`;
+        s.parentNode.insertBefore(w, s); w._sel = s; refreshGlassSelect(s);
+    }
+    function refreshGlassSelect(s) {
+        const w = s.previousSibling; if (!w || !w._sel) return;
+        const o = s.options[s.selectedIndex];
+        w.querySelector('.gs-label').innerHTML = o ? esc(o.textContent) : '<span class="text-muted-custom">— Chọn —</span>';
+        w.querySelector('.combo-panel').innerHTML = [...s.options].map((o, i) => `<div class="combo-option" onclick="pickGlassSelect(this,${i})">${esc(o.textContent)}</div>`).join('');
+    }
+    function toggleGlassSelect(btn) {
+        const p = btn.parentNode.querySelector('.combo-panel');
+        const open = p.style.display !== 'none';
+        closeAllCombos();
+        if (!open) p.style.display = '';
+    }
+    function pickGlassSelect(el, i) {
+        const w = el.closest('.combo'), s = w._sel;
+        s.selectedIndex = i; s.dispatchEvent(new Event('change'));
+        refreshGlassSelect(s); closeAllCombos();
+    }
+    function closeAllCombos() {
+        document.querySelectorAll('.combo-panel').forEach(p => {
+            if (p.style.display === 'none' || p.classList.contains('combo-closing')) return;
+            p.classList.add('combo-closing');
+            setTimeout(() => { p.style.display = 'none'; p.classList.remove('combo-closing'); }, 150);
+        });
+    }
+    document.addEventListener('click', e => { if (!e.target.closest('.combo')) closeAllCombos(); });
+
+    function saveView() { localStorage.setItem('byq_voucher_view', JSON.stringify({ q: vSearch, s: vStatus, o: vSort })); }
+    function cycleStatus() {
+        vStatus = STATUS_CYCLE[(STATUS_CYCLE.indexOf(vStatus) + 1) % STATUS_CYCLE.length];
+        saveView(); vPage = 1; render();
+    }
+    function visible() {
+        let list = [...vouchers];
+        if (vStatus) list = list.filter(v => v.effectiveStatus === vStatus);
+        if (vSearch.trim()) { const q = fold(vSearch); list = list.filter(v => fold(v.code).includes(q) || fold(v.name).includes(q)); }
+        if (vSort === 'newest') list.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0) || b.id - a.id);
+        else if (vSort === 'ending') list.sort((a, b) => new Date(a.endAt) - new Date(b.endAt));
+        else if (vSort === 'value') list.sort((a, b) => Number(b.discountValue) - Number(a.discountValue));
+        else list.sort((a, b) => a.code.localeCompare(b.code));
+        return list;
+    }
+    async function load() {
+        vouchers = await (await fetch(API + '/voucher/getAll')).json();
+        render();
+    }
+    function badge(v) {
+        const [label, bg, fg] = STATUS_META[v.effectiveStatus] || STATUS_META.INACTIVE;
+        return `<span class="badge" style="background:${bg};color:${fg};border:1px solid ${fg};padding:6px 10px">${label}</span>`;
+    }
+    function useBar(v) {
+        const pct = Math.min(100, Math.round(v.usedQuantity / v.quantity * 100));
+        const color = pct >= 100 ? '#f87171' : pct >= 70 ? '#fbbf24' : '#4ade80';
+        return `<div class="d-flex align-items-center gap-2"><div class="use-bar"><i style="width:${pct}%;background:${color}"></i></div><span class="text-muted-custom" style="font-size:.85rem">${v.usedQuantity}/${v.quantity}</span></div>`;
+    }
+    function render() {
+        const list = visible();
+        const pages = Math.max(1, Math.ceil(list.length / PAGE));
+        vPage = Math.min(Math.max(1, vPage), pages);
+        const slice = list.slice((vPage - 1) * PAGE, vPage * PAGE);
+        const cols = (selectMode ? 1 : 0) + 8;
+        document.getElementById('vHead').innerHTML = `<tr>${selectMode ? '<th style="width:36px"></th>' : ''}<th>Mã</th><th>Tên chương trình</th><th>Giảm</th><th>Đơn tối thiểu</th><th>Lượt dùng</th><th class="col-time">Thời gian</th><th>Tình trạng</th><th class="text-end">Thao tác</th></tr>`;
+        const body = document.getElementById('vBody');
+        if (!slice.length) {
+            body.innerHTML = `<tr><td colspan="${cols}" class="text-center py-5 text-muted-custom">${vouchers.length ? 'Không có voucher nào khớp bộ lọc / tìm kiếm.' : 'Chưa có voucher nào — bấm "Tạo voucher" để bắt đầu.'}</td></tr>`;
+        } else {
+            body.innerHTML = slice.map(v => `
+                <tr data-vid="${v.id}" class="${selectMode ? 'selectable' : ''} ${sel.has(v.id) ? 'row-selected' : ''}" onclick="rowClick(event,${v.id})">
+                    ${selectMode ? `<td><input type="checkbox" class="form-check-input sel-check" ${sel.has(v.id) ? 'checked' : ''} onchange="toggleSel(${v.id},this.checked)"></td>` : ''}
+                    <td><span class="code-badge">${esc(v.code)}</span><div class="text-muted-custom" style="font-size:.75rem">${v.scope === 'ITEM' ? 'Gắn sản phẩm' : 'Nhập tay checkout'}</div></td>
+                    <td class="fw-bold">${esc(v.name)}${v.description ? `<div class="text-muted-custom" style="font-size:.82rem">${esc(v.description)}</div>` : ''}</td>
+                    <td class="text-price">${v.discountType === 'PERCENT' ? v.discountValue + '%' : fmt(v.discountValue)}${v.maxDiscountAmount != null ? `<div class="text-muted-custom" style="font-size:.8rem">trần ${fmt(v.maxDiscountAmount)}</div>` : ''}</td>
+                    <td class="text-muted-custom">${fmt(v.minOrderValue)}</td>
+                    <td>${useBar(v)}</td>
+                    <td class="text-muted-custom col-time" style="font-size:.85rem">${dLabel(v.startAt)}<br>→ ${dLabel(v.endAt)}</td>
+                    <td>${badge(v)}</td>
+                    <td class="text-end"><div class="d-flex gap-2 justify-content-end">
+                        <button class="btn btn-icon" title="${v.status === 'ACTIVE' ? 'Ngừng voucher' : 'Kích hoạt voucher'}" onclick="toggleVoucher(${v.id})"><i class="bi bi-power"></i></button>
+                        <button class="btn btn-icon icon-warn" title="Sửa" onclick="openModal(${v.id})"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-icon icon-danger" title="Xóa" onclick="del([${v.id}])"><i class="bi bi-trash"></i></button>
+                    </div></td>
+                </tr>`).join('');
+        }
+        document.getElementById('vCount').innerText = `${list.length}/${vouchers.length} voucher • trang ${vPage}/${pages}`;
+        document.getElementById('prevBtn').disabled = vPage <= 1;
+        document.getElementById('nextBtn').disabled = vPage >= pages;
+        const sb = document.getElementById('statusBtn');
+        sb.classList.toggle('status-active', !!vStatus);
+        sb.innerHTML = `<i class="bi bi-tags me-1"></i>Tình trạng${vStatus ? ' • ' + STATUS_META[vStatus][0] : ''}`;
+        updateBar();
+    }
+    function rowClick(e, id) { if (!selectMode) return; if (e.target.closest('button,input,a,select,.combo')) return; toggleSel(id, !sel.has(id)); }
+    function toggleSel(id, on) { on ? sel.add(id) : sel.delete(id); paint(); }
+    function paint() {
+        document.querySelectorAll('tr[data-vid]').forEach(tr => {
+            const id = +tr.dataset.vid;
+            tr.classList.toggle('row-selected', sel.has(id));
+            const cb = tr.querySelector('.sel-check'); if (cb) cb.checked = sel.has(id);
+        });
+        updateBar();
+    }
+    function toggleSelectMode(force) {
+        selectMode = force === undefined ? !selectMode : force;
+        if (!selectMode) sel.clear();
+        render();
+    }
+    function updateBar() {
+        const bar = document.getElementById('selectionBar');
+        if (!selectMode || !sel.size) { bar.style.display = 'none'; return; }
+        bar.style.display = 'flex';
+        document.getElementById('selectionCount').innerText = `Đã chọn ${sel.size} voucher`;
+    }
+    async function del(ids) {
+        const codes = ids.map(id => (vouchers.find(v => v.id === id) || {}).code).filter(Boolean);
+        if (!await askConfirm(`Xóa ${ids.length} voucher (${codes.slice(0, 5).join(', ')}${codes.length > 5 ? '…' : ''})? Có thể hoàn tác ngay sau đó.`)) return;
+        const res = await fetch(API + '/admin/voucher/bulk-delete', { method: 'POST', headers: authHeaders, body: JSON.stringify({ ids }) });
+        if (!res.ok) { showToast(await errText(res), 'error'); return; }
+        lastDeleted = ids;
+        sel.clear();
+        await load();
+        showToast(`Đã xóa ${ids.length} voucher`, 'success', { label: 'Hoàn tác', fn: undoDelete });
+    }
+    async function bulkDelete() { if (sel.size) await del([...sel]); }
+    async function undoDelete() {
+        if (!lastDeleted.length) return;
+        const res = await fetch(API + '/admin/voucher/restore', { method: 'POST', headers: authHeaders, body: JSON.stringify({ ids: lastDeleted }) });
+        if (res.ok) { const j = await res.json(); showToast(`Đã hoàn tác ${j.restored} voucher`, 'success'); lastDeleted = []; await load(); }
+        else showToast(await errText(res), 'error');
+    }
+    async function toggleVoucher(id) {
+        const res = await fetch(API + '/admin/voucher/' + id + '/toggle', { method: 'POST', headers: authHeaders });
+        if (res.ok) { const v = await res.json(); showToast(`"${v.code}" → ${STATUS_META[v.effectiveStatus][0]}`, 'success'); await load(); }
+        else showToast(await errText(res), 'error');
+    }
+
+    /* filter delete */
+    function openFilterModal() {
+        ['dfType', 'dfStatus'].forEach(id => { const s = document.getElementById(id); s.selectedIndex = 0; refreshGlassSelect(s); });
+        document.getElementById('dfEnd').value = '';
+        renderFilterPreview();
+        filterModal.show();
+    }
+    function filterCriteria() {
+        return { discountType: document.getElementById('dfType').value || null,
+                 effectiveStatus: document.getElementById('dfStatus').value || null,
+                 endBefore: document.getElementById('dfEnd').value || null };
+    }
+    function filterMatches() {
+        const c = filterCriteria();
+        if (!c.discountType && !c.effectiveStatus && !c.endBefore) return null;
+        return vouchers.filter(v =>
+            (!c.discountType || v.discountType === c.discountType) &&
+            (!c.effectiveStatus || v.effectiveStatus === c.effectiveStatus) &&
+            (!c.endBefore || new Date(v.endAt) < new Date(c.endBefore)));
+    }
+    function renderFilterPreview() {
+        const m = filterMatches(), el = document.getElementById('dfPreview'), btn = document.getElementById('dfBtn');
+        if (!m) { el.innerHTML = '<span class="text-muted-custom">Chọn ít nhất một tiêu chí.</span>'; btn.disabled = true; return; }
+        if (!m.length) { el.innerHTML = '<span class="text-muted-custom">Không có voucher nào khớp tiêu chí.</span>'; btn.disabled = true; return; }
+        btn.disabled = false;
+        el.innerHTML = `<div class="text-muted-custom">Sẽ xóa <b style="color:#f87171">${m.length}</b> voucher:</div>` +
+            m.slice(0, 10).map(v => `<span class="code-badge me-1 mb-1 d-inline-block">${esc(v.code)}</span>`).join('') +
+            (m.length > 10 ? `<span class="text-muted-custom"> … (+${m.length - 10})</span>` : '');
+    }
+    async function submitFilterDelete() {
+        const m = filterMatches();
+        if (!m || !m.length) return;
+        const c = filterCriteria();
+        const desc = [c.discountType, c.effectiveStatus ? STATUS_META[c.effectiveStatus][0] : null, c.endBefore ? 'kết thúc trước ' + dLabel(c.endBefore) : null].filter(Boolean).join(' + ');
+        if (!await askConfirm(`Xóa ${m.length} voucher khớp: ${desc}? Hoàn tác được ngay sau đó.`)) return;
+        const ids = m.map(v => v.id);
+        const res = await fetch(API + '/admin/voucher/delete-by-filter', { method: 'POST', headers: authHeaders, body: JSON.stringify(c) });
+        if (res.ok) {
+            const j = await res.json();
+            lastDeleted = ids;
+            filterModal.hide(); await load();
+            showToast(`Đã xóa ${j.deleted} voucher theo tiêu chí`, 'success', { label: 'Hoàn tác', fn: undoDelete });
+        } else showToast(await errText(res), 'error');
+    }
+
+    /* modal + preview */
+    function openModal(id) {
+        editId = id;
+        const v = id ? vouchers.find(x => x.id === id) : null;
+        document.getElementById('modalTitle').innerText = v ? 'Sửa voucher ' + v.code : 'Tạo voucher';
+        document.getElementById('fCode').value = v ? v.code : '';
+        document.getElementById('fName').value = v ? v.name : '';
+        document.getElementById('fDesc').value = v ? (v.description || '') : '';
+        document.getElementById('fType').value = v ? v.discountType : 'PERCENT';
+        document.getElementById('fValue').value = v ? v.discountValue : '';
+        document.getElementById('fMax').value = v && v.maxDiscountAmount != null ? v.maxDiscountAmount : '';
+        document.getElementById('fMax').disabled = (v ? v.discountType : 'PERCENT') === 'FIXED';
+        document.getElementById('fMin').value = v ? v.minOrderValue : 0;
+        document.getElementById('fQty').value = v ? v.quantity : 100;
+        document.getElementById('fUsed').value = v ? v.usedQuantity : 0;
+        document.getElementById('fScope').value = v ? (v.scope || 'ORDER') : 'ORDER'; refreshGlassSelect(document.getElementById('fScope'));
+        const now = new Date(), plus30 = new Date(now.getTime() + 30 * 86400000);
+        document.getElementById('fStart').value = v ? dInput(v.startAt) : dInput(now.toISOString().slice(0, 16));
+        document.getElementById('fEnd').value = v ? dInput(v.endAt) : dInput(plus30.toISOString().slice(0, 16));
+        document.getElementById('fManual').value = v ? v.status : 'ACTIVE';
+        refreshGlassSelect(document.getElementById('fType'));
+        refreshGlassSelect(document.getElementById('fManual'));
+        document.getElementById('quickToggle').checked = false;
+        setQuickMode(false);
+        renderPreview();
+        modal.show();
+    }
+    function readForm() {
+        const type = document.getElementById('fType').value;
+        return {
+            code: document.getElementById('fCode').value.trim().toUpperCase(),
+            name: document.getElementById('fName').value.trim(),
+            description: document.getElementById('fDesc').value.trim() || null,
+            discountType: type,
+            discountValue: type === 'PERCENT' ? Number(document.getElementById('fValue').value) : parseMoney(document.getElementById('fValue').value),
+            minOrderValue: parseMoney(document.getElementById('fMin').value),
+            maxDiscountAmount: type === 'FIXED' ? null : (document.getElementById('fMax').value.trim() === '' ? null : parseMoney(document.getElementById('fMax').value)),
+            quantity: Number(document.getElementById('fQty').value),
+            startAt: document.getElementById('fStart').value || null,
+            endAt: document.getElementById('fEnd').value || null,
+            status: document.getElementById('fManual').value,
+            scope: document.getElementById('fScope').value,
+        };
+    }
+    function effPreview(f) {
+        if (f.status === 'INACTIVE') return 'INACTIVE';
+        const now = new Date();
+        if (!f.startAt || !f.endAt) return 'INACTIVE';
+        if (now < new Date(f.startAt)) return 'SCHEDULED';
+        if (now > new Date(f.endAt)) return 'EXPIRED';
+        const used = editId ? (vouchers.find(v => v.id === editId) || {}).usedQuantity || 0 : 0;
+        if (used >= f.quantity) return 'USED_UP';
+        return 'ACTIVE';
+    }
+    function renderPreview() {
+        const f = readForm();
+        const out = document.getElementById('previewOut');
+        const sub = parseMoney(document.getElementById('pSubtotal').value);
+        const eff = effPreview(f);
+        const [label, , fg] = STATUS_META[eff] || STATUS_META.INACTIVE;
+        let lines = `<div class="preview-line"><span class="text-muted-custom">Tình trạng hiệu lực</span><b style="color:${fg}">${label}</b></div>`;
+        if (isNaN(sub) || sub <= 0) lines += `<div class="preview-line"><span class="text-muted-custom">Nhập đơn thử hợp lệ để xem số tiền giảm.</span></div>`;
+        else if (isNaN(f.minOrderValue) || sub < f.minOrderValue) lines += `<div class="preview-line"><span class="text-muted-custom">Đơn thử ${fmt(sub)}</span><b style="color:#f87171">Chưa đạt tối thiểu ${fmt(f.minOrderValue || 0)}</b></div>`;
+        else if (isNaN(f.discountValue) || f.discountValue <= 0) lines += `<div class="preview-line"><span class="text-muted-custom">Giá trị giảm chưa hợp lệ.</span></div>`;
+        else {
+            let d = f.discountType === 'PERCENT' ? Math.floor(sub * f.discountValue / 100) : f.discountValue;
+            if (f.maxDiscountAmount != null && !isNaN(f.maxDiscountAmount) && d > f.maxDiscountAmount) d = f.maxDiscountAmount;
+            if (d > sub) d = sub;
+            lines += `<div class="preview-line"><span class="text-muted-custom">Đơn thử</span><b>${fmt(sub)}</b></div>
+                <div class="preview-line"><span class="text-muted-custom">Số tiền giảm</span><b style="color:#4ade80">− ${fmt(d)}</b></div>
+                <div class="preview-line"><span class="text-muted-custom">Khách trả</span><b style="color:#4ade80">${fmt(sub - d)}</b></div>`;
+        }
+        out.innerHTML = lines;
+    }
+    function baseValid(f) {
+        if (!f.name || f.name.length > 100) return 'Tên bắt buộc, tối đa 100 ký tự';
+        if (isNaN(f.discountValue) || f.discountValue <= 0) return 'Giá trị giảm phải > 0';
+        if (f.discountType === 'PERCENT' && f.discountValue > 100) return 'Giảm % không được vượt quá 100';
+        if (isNaN(f.minOrderValue) || f.minOrderValue < 0) return 'Đơn tối thiểu phải >= 0';
+        if (f.maxDiscountAmount != null && (isNaN(f.maxDiscountAmount) || f.maxDiscountAmount < 0)) return 'Mức giảm tối đa phải >= 0';
+        if (!Number.isInteger(f.quantity) || f.quantity < 1 || f.quantity > 100000) return 'Số lượt phải 1–100.000';
+        if (!f.startAt || !f.endAt || new Date(f.endAt) <= new Date(f.startAt)) return 'Kết thúc phải sau bắt đầu';
+        return null;
+    }
+    async function save() {
+        const f = readForm();
+        if (!/^[A-Z0-9-]{3,20}$/.test(f.code)) { showToast('Mã phải 3–20 ký tự: chữ hoa, số, gạch ngang (vd: WELCOME50)!', 'error'); return; }
+        const clash = vouchers.find(v => v.code.toLowerCase() === f.code.toLowerCase() && v.id !== editId);
+        if (clash) { showToast('Mã "' + f.code + '" đã tồn tại!', 'error'); return; }
+        const err = baseValid(f);
+        if (err) { showToast(err + '!', 'error'); return; }
+        if (editId) { const used = (vouchers.find(v => v.id === editId) || {}).usedQuantity || 0; if (f.quantity < used) { showToast('Số lượt mới không được nhỏ hơn lượt đã dùng (' + used + ')!', 'error'); return; } }
+        const res = await fetch(editId ? API + '/admin/voucher/' + editId : API + '/admin/voucher/create', { method: editId ? 'PUT' : 'POST', headers: authHeaders, body: JSON.stringify(f) });
+        if (res.ok) { showToast(editId ? 'Cập nhật voucher thành công' : 'Tạo voucher thành công', 'success'); modal.hide(); await load(); }
+        else showToast(await errText(res), 'error');
+    }
+
+    /* quick-add */
+    function lockMain(on) {
+        document.querySelectorAll('#vMainFields input').forEach(el => { el.disabled = on; });
+        document.getElementById('fUsed').disabled = true;
+        document.querySelectorAll('#vMainFields select').forEach(el => { el.disabled = on; });
+        document.querySelectorAll('#vMainFields .glass-select-wrap').forEach(w => w.classList.toggle('field-locked', on));
+        if (!on) document.getElementById('fMax').disabled = document.getElementById('fType').value === 'FIXED';
+        document.getElementById('saveBtn').style.display = on ? 'none' : '';
+    }
+    function setQuickMode(on) {
+        if (on) {
+            const f = readForm();
+            const err = baseValid(f);
+            if (err) { showToast(err + ' — điền đủ thông tin gốc trước khi bật thêm nhanh!', 'error'); document.getElementById('quickToggle').checked = false; return; }
+            qBase = f;
+            qPrefix = f.code || 'MA';
+            qFrom = 1; qTo = 5; qList = ''; qRemoved.clear(); qRows = [];
+            lockMain(true);
+            document.getElementById('quickPanel').style.display = '';
+            renderQuickGen(); rebuildQuick();
+        } else {
+            lockMain(false);
+            document.getElementById('quickPanel').style.display = 'none';
+        }
+        quickMode = on;
+    }
+    function renderQuickGen() {
+        const box = document.getElementById('quickGen');
+        if (qGen === 'range') {
+            box.innerHTML = `<div class="d-flex align-items-center gap-2 flex-wrap">
+                <input type="text" class="form-control" style="width:140px;text-transform:uppercase" id="qPrefix" value="${esc(qPrefix)}" placeholder="Tiền tố mã" oninput="qPrefix=this.value.toUpperCase();rebuildQuick()" onchange="this.value=qPrefix">
+                <div class="stepper"><button type="button" onclick="qStep('from',-1)">−</button><input type="number" min="1" max="999" value="${qFrom}" onchange="qBound('from',this.value)"><button type="button" onclick="qStep('from',1)">+</button></div>
+                <span class="text-muted-custom">→</span>
+                <div class="stepper"><button type="button" onclick="qStep('to',-1)">−</button><input type="number" min="1" max="999" value="${qTo}" onchange="qBound('to',this.value)"><button type="button" onclick="qStep('to',1)">+</button></div>
+                <span class="text-muted-custom">vd: ${esc(qPrefix)}-01 … ${esc(qPrefix)}-${String(qTo).padStart(2, '0')}</span>
+            </div>`;
+        } else {
+            box.innerHTML = `<textarea class="form-control" rows="4" id="qList" placeholder="Mỗi dòng một mã, vd:\nSALE-A\nSALE-B" oninput="qList=this.value;rebuildQuick()">${esc(qList)}</textarea>`;
+        }
+    }
+    function qBound(which, raw) {
+        let n = parseInt(raw, 10); if (isNaN(n)) n = 1;
+        n = Math.min(999, Math.max(1, n));
+        if (which === 'from') { qFrom = n; if (qTo < n) qTo = n; } else { qTo = n; if (qFrom > n) qFrom = n; }
+        renderQuickGen(); rebuildQuick();
+    }
+    function qStep(which, d) { qBound(which, (which === 'from' ? qFrom : qTo) + d); }
+    function genCodes() {
+        if (qGen === 'list') return qList.split(/\r?\n/).map(s => s.trim().toUpperCase()).filter(Boolean);
+        const out = [];
+        for (let i = qFrom; i <= qTo; i++) out.push(qPrefix + '-' + String(i).padStart(2, '0'));
+        return out;
+    }
+    function rebuildQuick() {
+        if (!quickMode) return;
+        const codes = genCodes();
+        const wrap = document.getElementById('quickPreviewWrap');
+        const footer = document.getElementById('quickFooter');
+        const bad = codes.find(c => !/^[A-Z0-9-]{3,20}$/.test(c));
+        if (bad) {
+            qRows = [];
+            wrap.innerHTML = `<div class="text-muted-custom mt-2">Mã <b style="color:#f87171">${esc(bad)}</b> không hợp lệ (3–20 ký tự hoa/số/gạch ngang). Sửa tiền tố hoặc danh sách.</div>`;
+            footer.style.display = 'none'; return;
+        }
+        if (codes.length > QUICK_CAP) {
+            qRows = [];
+            wrap.innerHTML = `<div class="text-muted-custom mt-2">Đang sinh <b style="color:#f87171">${codes.length}</b> mã — vượt trần ${QUICK_CAP}. Thu hẹp khoảng hoặc bớt dòng.</div>`;
+            footer.style.display = 'none'; return;
+        }
+        const prev = new Map(qRows.map(r => [r.key, r]));
+        qRows = [];
+        for (const c of codes) {
+            if (qRemoved.has(c)) continue;
+            const old = prev.get(c);
+            qRows.push(old ? { ...old } : { _id: ++qSeq, key: c, code: c, value: qBase.discountValue, quantity: qBase.quantity });
+        }
+        renderQuickRows(); refreshQuickMeta();
+    }
+    function renderQuickRows() {
+        const wrap = document.getElementById('quickPreviewWrap');
+        if (!qRows.length) {
+            wrap.innerHTML = '<div class="text-muted-custom mt-2">Chưa còn mã xem trước nào.</div>';
+            document.getElementById('quickFooter').style.display = 'none'; return;
+        }
+        const isPct = qBase.discountType === 'PERCENT';
+        wrap.innerHTML = `<div class="text-muted-custom mt-2 mb-1">Bản xem trước — sửa từng mã nếu cần:</div>
+            <div class="preview-scroll"><table class="table table-sm table-borderless">
+            <thead><tr><th>Mã</th><th>Giá trị giảm${isPct ? ' (%)' : ' (VND)'}</th><th>Số lượt</th><th></th><th></th></tr></thead>
+            <tbody>${qRows.map(r => `<tr>
+                <td><input type="text" class="form-control form-control-sm" style="width:150px;text-transform:uppercase" value="${esc(r.code)}" oninput="qEdit(${r._id},'code',this.value)"></td>
+                <td><input type="text" inputmode="decimal" class="form-control form-control-sm" style="width:110px" value="${isNaN(r.value) ? '' : r.value}" oninput="qEdit(${r._id},'value',this.value)"></td>
+                <td><input type="number" min="1" max="100000" class="form-control form-control-sm" style="width:90px" value="${r.quantity}" oninput="qEdit(${r._id},'quantity',this.value)"></td>
+                <td id="qdup-${r._id}"></td>
+                <td><button type="button" class="btn btn-icon icon-danger" style="width:28px;height:28px" onclick="qRemove(${r._id})"><i class="bi bi-x-lg"></i></button></td>
+            </tr>`).join('')}</tbody></table></div>`;
+        document.getElementById('quickFooter').style.display = 'flex';
+    }
+    function refreshQuickMeta() {
+        const db = new Set(vouchers.map(v => v.code.toLowerCase()));
+        const seen = new Set();
+        qRows.forEach(r => { const c = r.code.toLowerCase(); r.dup = db.has(c) || seen.has(c); seen.add(c); });
+        qRows.forEach(r => { const el = document.getElementById('qdup-' + r._id); if (el) el.innerHTML = r.dup ? '<span class="dup-badge">trùng</span>' : '<span class="ok-badge">mới</span>'; });
+        const create = qRows.filter(r => !r.dup).length;
+        document.getElementById('quickCounts').innerHTML = `Sẽ tạo <b style="color:#4ade80">${create}</b> • bỏ qua <b style="color:#f87171">${qRows.length - create}</b> trùng • trần ${QUICK_CAP}`;
+        document.getElementById('bulkBtn').disabled = create === 0;
+    }
+    function qEdit(id, field, raw) {
+        const r = qRows.find(x => x._id === id); if (!r) return;
+        if (field === 'code') r.code = raw.trim().toUpperCase();
+        else if (field === 'value') r.value = qBase.discountType === 'PERCENT' ? Number(raw) : parseMoney(raw);
+        else r.quantity = Number(raw);
+        refreshQuickMeta();
+    }
+    function qRemove(id) {
+        const r = qRows.find(x => x._id === id); if (!r) return;
+        qRemoved.add(r.key);
+        qRows = qRows.filter(x => x._id !== id);
+        renderQuickRows(); refreshQuickMeta();
+    }
+    async function bulkSubmit() {
+        refreshQuickMeta();
+        const rows = qRows.filter(r => !r.dup);
+        if (!rows.length) { showToast('Không có mã mới nào để tạo!', 'error'); return; }
+        for (let i = 0; i < rows.length; i++) {
+            const r = rows[i];
+            if (!/^[A-Z0-9-]{3,20}$/.test(r.code)) { showToast('Hàng ' + (i + 1) + ': mã không hợp lệ!', 'error'); return; }
+            if (isNaN(r.value) || r.value <= 0 || (qBase.discountType === 'PERCENT' && r.value > 100)) { showToast('Hàng ' + (i + 1) + ': giá trị giảm không hợp lệ!', 'error'); return; }
+            if (!Number.isInteger(r.quantity) || r.quantity < 1 || r.quantity > 100000) { showToast('Hàng ' + (i + 1) + ': số lượt không hợp lệ!', 'error'); return; }
+        }
+        const skip = qRows.length - rows.length;
+        if (!await askConfirm(`Tạo ${rows.length} voucher mới` + (skip ? ` (bỏ qua ${skip} mã trùng)` : '') + '?', { text: 'Tạo', tone: 'add' })) return;
+        const payload = rows.map(r => ({ ...qBase, code: r.code, discountValue: r.value, quantity: r.quantity }));
+        const res = await fetch(API + '/admin/voucher/bulk-rows', { method: 'POST', headers: authHeaders, body: JSON.stringify({ rows: payload }) });
+        if (res.ok) {
+            const j = await res.json();
+            showToast(`Đã tạo ${j.created} voucher` + (j.skipped ? `, bỏ qua ${j.skipped} trùng (${j.skippedValues.join(', ')})` : ''), 'success');
+            modal.hide(); await load();
+        } else showToast(await errText(res), 'error');
+    }
+
+    document.getElementById('searchInput').value = vSearch;
+    document.getElementById('sortSelect').value = vSort;
+    ['sortSelect', 'fType', 'fManual', 'dfType', 'dfStatus', 'fScope'].forEach(id => upgradeSelect(document.getElementById(id)));
+    load();
+</script>
+</body>
+</html>

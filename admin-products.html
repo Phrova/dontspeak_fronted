@@ -10,13 +10,6 @@
     <link rel="stylesheet" href="admin-theme.css">
     <script src="page-transition.js" defer></script>
     <style>
-        .preview-scroll table { min-width: 980px; }
-        .preview-scroll th { white-space: nowrap; }
-        .preview-scroll .combo-toggle { white-space: nowrap; padding: 8px 10px; font-size: .85rem; }
-        .preview-scroll .combo-toggle > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .preview-scroll td:nth-child(1) .combo, .preview-scroll td:nth-child(2) .combo { min-width: 120px; }
-        .preview-scroll td:nth-child(3) .combo, .preview-scroll td:nth-child(4) .combo { min-width: 90px; }
-        .preview-scroll td:nth-child(5) input { min-width: 110px; }
         .selection-bar { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 1070; display: flex; gap: 12px; align-items: center; background: linear-gradient(135deg, rgba(24,24,28,.85), rgba(14,14,18,.8)); backdrop-filter: blur(25px) saturate(170%); border: 1px solid rgba(255,255,255,.2); border-radius: 18px; padding: 12px 18px; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 15px 40px rgba(0,0,0,.5); animation: fadeUpIn .25s var(--ios-ease) backwards; }
         .sel-check { width: 18px; height: 18px; cursor: pointer; background-color: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.4); }
         .sel-check:checked { background-color: #22c55e; border-color: #22c55e; }
@@ -35,11 +28,12 @@
         .combo-locked { opacity: .45; pointer-events: none; }
         .field-locked { opacity: .45; pointer-events: none; }
         .preview-scroll { overflow: auto; max-height: 320px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; }
-        .preview-scroll table { margin: 0; }
-        .preview-scroll td, .preview-scroll th { padding: 8px 10px; font-size: .9rem; }
+        .preview-scroll table { margin: 0; min-width: 980px; }
+        .preview-scroll td, .preview-scroll th { padding: 8px 10px; font-size: .9rem; white-space: nowrap; }
         .quick-footer { position: sticky; bottom: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; margin-top: 10px; background: linear-gradient(135deg, rgba(24,24,28,.92), rgba(14,14,18,.9)); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,.18); border-radius: 14px; box-shadow: inset 0 1px 0 rgba(255,255,255,.2); }
         .dup-badge { font-size: .75rem; color: #f87171; border: 1px solid rgba(239,68,68,.4); background: rgba(239,68,68,.12); border-radius: 12px; padding: 2px 8px; white-space: nowrap; }
         .ok-badge { font-size: .75rem; color: #4ade80; border: 1px solid rgba(74,222,128,.4); background: rgba(74,222,128,.12); border-radius: 12px; padding: 2px 8px; white-space: nowrap; }
+        .code-badge { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; background: rgba(74,222,128,.14); border: 1px solid rgba(74,222,128,.4); color: #4ade80; border-radius: 10px; padding: 2px 8px; font-size: .8rem; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -129,15 +123,25 @@
                             </div></div>
                         <div class="col-md-6 mb-3"><label class="form-label">Tồn kho</label>
                             <input type="number" class="form-control" id="vStock" min="0" max="1000000" placeholder="10"></div>
-                        <div class="col-md-6 mb-3"><label class="form-label">Kiểu giảm giá</label>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Cách giảm giá của biến thể</label>
+                            <div class="d-flex gap-3 flex-wrap">
+                                <label class="quick-item"><input type="radio" name="dmode" class="form-check-input" checked onchange="setDiscountMode('DIRECT')"> Giảm trực tiếp (% / số tiền)</label>
+                                <label class="quick-item"><input type="radio" name="dmode" class="form-check-input" onchange="setDiscountMode('VOUCHER')"> Gắn mã khuyến mãi (voucher ITEM)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3" id="directTypeCol"><label class="form-label">Kiểu giảm</label>
                             <select class="form-select glass-native" id="vDiscType" onchange="document.getElementById('vDiscValue').disabled = !this.value">
                                 <option value="">Không giảm</option><option value="PERCENT">Theo % (PERCENT)</option><option value="FIXED">Số tiền cố định (FIXED)</option>
                             </select></div>
-                        <div class="col-md-6 mb-3"><label class="form-label">Giá trị giảm</label>
+                        <div class="col-md-6 mb-3" id="directValueCol"><label class="form-label">Giá trị giảm</label>
                             <div class="money-wrap">
-                                <div class="money-hint">PERCENT: nhập 0–100. FIXED: số tiền ≤ giá bán, hỗ trợ <b>500k</b> / <b>1m</b>.</div>
+                                <div class="money-hint">PERCENT: 0–100. FIXED: số tiền ≤ giá bán.</div>
                                 <input type="text" inputmode="decimal" class="form-control" id="vDiscValue" disabled>
                             </div></div>
+                        <div class="col-md-6 mb-3" id="voucherCol" style="display:none"><label class="form-label">Mã gắn cho biến thể</label>
+                            <select class="form-select glass-native" id="vVoucher" onchange="renderVoucherHint()"></select>
+                            <div class="form-text text-muted-custom" id="voucherHint"></div></div>
                         <div class="col-md-6 mb-3"><label class="form-label">Tình trạng</label>
                             <select class="form-select glass-native" id="vStatus" onchange="syncStockLock()">
                                 <option value="">Tự động theo tồn kho</option>
@@ -155,20 +159,22 @@
                     <div class="text-muted-custom mb-2">Thông số gốc (áp cho mọi hàng xem trước):</div>
                     <div class="row">
                         <div class="col-md-4 mb-2"><label class="form-label">Giá bán (VND)</label>
-                            <input type="text" inputmode="decimal" class="form-control" id="qPrice" onchange="rebuildPreview()" placeholder="vd: 1m"></div>
+                            <input type="text" inputmode="decimal" class="form-control" id="qPrice" oninput="rebuildPreview()" placeholder="vd: 1m"></div>
                         <div class="col-md-4 mb-2"><label class="form-label">Tồn kho</label>
-                            <input type="number" class="form-control" id="qStock" min="0" max="1000000" onchange="rebuildPreview()"></div>
+                            <input type="number" class="form-control" id="qStock" min="0" max="1000000" oninput="rebuildPreview()"></div>
                         <div class="col-md-4 mb-2"><label class="form-label">Tình trạng</label>
                             <select class="form-select glass-native" id="qStatus" onchange="syncQuickStock()">
                                 <option value="">Tự động theo tồn kho</option>
                                 <option value="INCOMING">Sắp về hàng</option>
                             </select></div>
-                        <div class="col-md-4 mb-2"><label class="form-label">Kiểu giảm giá</label>
+                        <div class="col-md-4 mb-2" id="qDiscTypeCol"><label class="form-label">Kiểu giảm giá</label>
                             <select class="form-select glass-native" id="qDiscType" onchange="document.getElementById('qDiscValue').disabled = !this.value; rebuildPreview()">
                                 <option value="">Không giảm</option><option value="PERCENT">Theo %</option><option value="FIXED">Số tiền cố định</option>
                             </select></div>
-                        <div class="col-md-4 mb-2"><label class="form-label">Giá trị giảm</label>
-                            <input type="text" inputmode="decimal" class="form-control" id="qDiscValue" disabled onchange="rebuildPreview()"></div>
+                        <div class="col-md-4 mb-2" id="qDiscValueCol"><label class="form-label">Giá trị giảm</label>
+                            <input type="text" inputmode="decimal" class="form-control" id="qDiscValue" disabled oninput="rebuildPreview()"></div>
+                        <div class="col-md-4 mb-2" id="qVoucherCol" style="display:none"><label class="form-label">Mã ITEM áp cho cả loạt</label>
+                            <input type="text" class="form-control" id="qVoucherLabel" disabled></div>
                     </div>
                     <div class="text-muted-custom mb-2 mt-2">Chọn giá trị nhân bản (trục nào để trống = dùng thông số gốc):</div>
                     <div class="row" id="quickAxes"></div>
@@ -247,15 +253,17 @@
     const V_PAGE = 8, QUICK_CAP = 40;
     const STATUS_CYCLE = [null, 'INCOMING', 'AVAILABLE', 'OUT_OF_STOCK'];
     const STATUS_SHORT = { INCOMING: 'Sắp về', AVAILABLE: 'Còn', OUT_OF_STOCK: 'Hết' };
+    const VSTATUS = { ACTIVE: 'Đang chạy', SCHEDULED: 'Sắp diễn ra', EXPIRED: 'Hết hạn', USED_UP: 'Hết lượt', INACTIVE: 'Ngừng' };
     let filterPid = null;
 
-    /* quick-add v2 state */
-    let quickMode = false, rowSeq = 0, quickOver = false;
-    let quickBaseSpecs = null, quickRows = [];
+    let quickMode = false, quickOver = false, rowSeq = 0;
+    let quickBaseSpecs = null, quickRows = [], quickVoucherId = null;
     const quickSel = { COLOR: new Set(), STRING: new Set(), GRIP: new Set() };
     const quickTensions = new Set(), quickRemoved = new Set();
     let quickFrom = 9, quickTo = 12;
     const quickOptions = { COLOR: [], STRING: [], TENSION: [], GRIP: [] };
+
+    let discountMode = 'DIRECT', itemVouchers = [];
 
     const productModal = new bootstrap.Modal(document.getElementById('productModal'));
     const variantModal = new bootstrap.Modal(document.getElementById('variantModal'));
@@ -272,6 +280,7 @@
     async function errText(res) { const t = await res.text(); try { const j = JSON.parse(t); return j.message || j.error || t; } catch (e) { return t; } }
     const discountLabel = v => !v.discountType ? '—' : (v.discountType === 'PERCENT' ? '-' + v.discountValue + '%' : '-' + fmt(v.discountValue));
     const finalPrice = v => { if (!v.discountType) return v.price; const p = v.discountType === 'PERCENT' ? v.price * (100 - v.discountValue) / 100 : v.price - v.discountValue; return Math.max(0, Math.round(p)); };
+    const unitPrice = v => v.effectivePrice != null ? Number(v.effectivePrice) : finalPrice(v);
     const statusOf = v => v.status || (v.stockQuantity > 0 ? 'AVAILABLE' : 'OUT_OF_STOCK');
     const statusBadge = v => {
         const map = { AVAILABLE: ['Còn hàng', 'rgba(34,197,94,0.25)', '#4ade80'], OUT_OF_STOCK: ['Hết hàng', 'rgba(239,68,68,0.25)', '#f87171'], INCOMING: ['Sắp về hàng', 'rgba(59,130,246,0.25)', '#60a5fa'] };
@@ -352,7 +361,7 @@
         return { value: v };
     }
 
-    /* ===== Glass dropdown ===== */
+    /* glass dropdowns */
     function upgradeSelect(sel) {
         if (sel.dataset.upgraded) { refreshGlassSelect(sel); return; }
         sel.dataset.upgraded = '1'; sel.style.display = 'none';
@@ -385,7 +394,7 @@
         closeAllCombos();
     }
 
-    /* ===== Combo danh mục ===== */
+    /* combos danh mục */
     const comboState = {};
     const CAT_LABEL = { BRAND: 'thương hiệu', COLOR: 'màu sắc', STRING: 'loại dây', TENSION: 'độ căng dây', GRIP: 'trọng lượng / cỡ cán' };
     function initCombo(key, category, value) { comboState[key] = { category, value: value || '', options: null }; renderCombo(key); }
@@ -450,7 +459,7 @@
         else showToast(await errText(res), 'error');
     }
 
-    /* ===== Bảng sản phẩm ===== */
+    /* bảng sản phẩm */
     async function load() {
         const [pRes, sRes] = await Promise.all([fetch(API + '/product/getAll'), fetch(API + '/product/stock')]);
         products = await pRes.json(); stockMap = await sRes.json();
@@ -562,7 +571,7 @@
         const val = v => {
             if (s.key === 'tension') return parseFloat(v.tension) || 0;
             if (s.key === 'price') return Number(v.price) || 0;
-            if (s.key === 'final') return finalPrice(v);
+            if (s.key === 'final') return unitPrice(v);
             if (s.key === 'stock') return Number(v.stockQuantity) || 0;
             return v.createdAt ? new Date(v.createdAt).getTime() : 0;
         };
@@ -619,7 +628,7 @@
                     <th class="vsort" onclick="setVariantSort(${pid},'tension')">Độ căng${sortArrow(pid, 'tension')}</th>
                     <th>Cán</th>
                     <th class="vsort" onclick="setVariantSort(${pid},'price')">Giá gốc${sortArrow(pid, 'price')}</th>
-                    <th>Giảm</th>
+                    <th>Giảm / Mã</th>
                     <th class="vsort" onclick="setVariantSort(${pid},'final')">Giá bán${sortArrow(pid, 'final')}</th>
                     <th class="vsort text-center" onclick="setVariantSort(${pid},'stock')">Tồn${sortArrow(pid, 'stock')}</th>
                     <th>Tình trạng</th><th></th>
@@ -627,9 +636,9 @@
                 <tbody>${list.map(v => `<tr data-vid="${v.id}" class="${selectMode ? 'selectable' : ''} ${selVariants.has(v.id) ? 'row-selected' : ''}" onclick="rowClickVariant(event, ${v.id})">
                     ${selectMode ? `<td><input type="checkbox" class="form-check-input sel-check" ${selVariants.has(v.id) ? 'checked' : ''} onchange="toggleSelVariant(${v.id}, this.checked)"></td>` : ''}
                     <td class="fw-bold">${esc(v.color)}</td><td>${esc(v.stringType)}</td><td>${esc(v.tension)}</td><td>${esc(v.weightGrip)}</td>
-                    <td class="text-muted-custom ${v.discountType ? 'text-decoration-line-through' : ''}">${fmt(v.price)}</td>
-                    <td class="text-danger fw-bold">${discountLabel(v)}</td>
-                    <td class="text-price">${fmt(finalPrice(v))}</td>
+                    <td class="text-muted-custom ${(v.discountType || v.voucherCode) ? 'text-decoration-line-through' : ''}">${fmt(v.price)}</td>
+                    <td class="text-danger fw-bold">${v.voucherCode ? `<span class="code-badge">${esc(v.voucherCode)}</span>` : discountLabel(v)}</td>
+                    <td class="text-price">${fmt(unitPrice(v))}</td>
                     <td class="text-center fw-bold">${v.stockQuantity}</td>
                     <td>${statusBadge(v)}</td>
                     <td>
@@ -646,7 +655,7 @@
             : `<em class="text-muted-custom">${f ? 'Không có biến thể nào ở tình trạng này.' : 'Sản phẩm này chưa có biến thể nào.'}</em>`}`;
     }
 
-    /* ===== Xóa theo tiêu chí ===== */
+    /* xóa theo tiêu chí */
     async function openFilterModal(pid) {
         filterPid = pid;
         if (!variantsCache[pid]) await loadVariants(pid);
@@ -690,7 +699,7 @@
         else showToast(await errText(res), 'error');
     }
 
-    /* ===== Sản phẩm ===== */
+    /* sản phẩm */
     function openProductModal(id) {
         productModalId = id;
         const p = id ? products.find(x => x.id === id) : null;
@@ -735,7 +744,33 @@
         if (res.ok) { showToast('Đã xóa sản phẩm', 'success'); openIds.delete(id); load(); } else showToast(await errText(res), 'error');
     }
 
-    /* ===== Biến thể: single ===== */
+    /* biến thể: single + discount mode */
+    async function setDiscountMode(m) {
+        discountMode = m;
+        document.getElementById('directTypeCol').style.display = m === 'DIRECT' ? '' : 'none';
+        document.getElementById('directValueCol').style.display = m === 'DIRECT' ? '' : 'none';
+        document.getElementById('voucherCol').style.display = m === 'VOUCHER' ? '' : 'none';
+        if (m === 'VOUCHER') {
+            const all = await (await fetch(API + '/voucher/getAll')).json();
+            itemVouchers = all.filter(v => v.scope === 'ITEM');
+            const sel = document.getElementById('vVoucher');
+            const cur = sel.value;
+            sel.innerHTML = '<option value="">— Chọn mã ITEM —</option>' + itemVouchers.map(v =>
+                `<option value="${v.id}">${esc(v.code)} • ${v.discountType === 'PERCENT' ? v.discountValue + '%' : fmt(v.discountValue)} • ${VSTATUS[v.effectiveStatus] || v.effectiveStatus}</option>`).join('');
+            if (cur) sel.value = cur;
+            refreshGlassSelect(sel);
+            renderVoucherHint();
+        }
+    }
+    function renderVoucherHint() {
+        const id = Number(document.getElementById('vVoucher').value);
+        const v = itemVouchers.find(x => x.id === id);
+        const el = document.getElementById('voucherHint');
+        if (!v) { el.innerText = 'Chỉ liệt kê voucher phạm vi ITEM.'; return; }
+        el.innerText = v.effectiveStatus === 'ACTIVE'
+            ? 'Mã đang hiệu lực — giá bán sẽ tự giảm khi khách xem.'
+            : 'Mã chưa hiệu lực (' + (VSTATUS[v.effectiveStatus] || v.effectiveStatus) + ') — giá giữ nguyên tới khi mã chạy.';
+    }
     function openVariantModal(pid, vid) {
         variantModalState = { productId: pid, variantId: vid };
         const v = vid ? (variantsCache[pid] || []).find(x => x.id === vid) : null;
@@ -753,31 +788,42 @@
         refreshGlassSelect(document.getElementById('vDiscType'));
         refreshGlassSelect(document.getElementById('vStatus'));
         syncStockLock();
+        discountMode = v && v.voucherId ? 'VOUCHER' : 'DIRECT';
+        document.querySelectorAll('input[name="dmode"]')[0].checked = discountMode === 'DIRECT';
+        document.querySelectorAll('input[name="dmode"]')[1].checked = discountMode === 'VOUCHER';
+        setDiscountMode(discountMode).then(() => {
+            if (v && v.voucherId) { document.getElementById('vVoucher').value = String(v.voucherId); refreshGlassSelect(document.getElementById('vVoucher')); renderVoucherHint(); }
+        });
         document.getElementById('quickToggle').checked = false;
         setQuickMode(false);
         variantModal.show();
     }
     function baseFromModal() {
-        const discType = document.getElementById('vDiscType').value || null;
+        const voucherMode = discountMode === 'VOUCHER';
+        const discType = voucherMode ? null : (document.getElementById('vDiscType').value || null);
         const incoming = document.getElementById('vStatus').value === 'INCOMING';
         return { color: comboState.Color.value, stringType: comboState.String.value, tension: comboState.Tension.value, weightGrip: comboState.Grip.value,
             price: parseMoney(document.getElementById('vPrice').value), stockQuantity: incoming ? 0 : Number(document.getElementById('vStock').value || 0),
-            discountType: discType, discountValue: discType === 'PERCENT' ? Number(document.getElementById('vDiscValue').value) : parseMoney(document.getElementById('vDiscValue').value),
+            discountType: discType, discountValue: discType === 'PERCENT' ? Number(document.getElementById('vDiscValue').value) : (discType ? parseMoney(document.getElementById('vDiscValue').value) : null),
+            voucherId: voucherMode ? (Number(document.getElementById('vVoucher').value) || null) : null,
             status: incoming ? 'INCOMING' : null };
     }
     function validateVariantRow(b, label) {
         if (!b.color || !b.stringType || !b.tension || !b.weightGrip) { showToast(label + ': chọn đủ màu, dây, độ căng, cỡ cán!', 'error'); return false; }
         if (isNaN(b.price) || b.price <= 0) { showToast(label + ': giá bán không hợp lệ!', 'error'); return false; }
         if (!Number.isInteger(b.stockQuantity) || b.stockQuantity < 0 || b.stockQuantity > 1000000) { showToast(label + ': tồn kho không hợp lệ!', 'error'); return false; }
-        if (b.discountType && (isNaN(b.discountValue) || b.discountValue < 0)) { showToast(label + ': giá trị giảm không hợp lệ!', 'error'); return false; }
-        if (b.discountType === 'PERCENT' && b.discountValue > 100) { showToast(label + ': giảm % không được vượt quá 100!', 'error'); return false; }
-        if (b.discountType === 'FIXED' && b.discountValue > b.price) { showToast(label + ': giảm cố định không được vượt quá giá bán!', 'error'); return false; }
+        if (!b.voucherId) {
+            if (b.discountType && (isNaN(b.discountValue) || b.discountValue < 0)) { showToast(label + ': giá trị giảm không hợp lệ!', 'error'); return false; }
+            if (b.discountType === 'PERCENT' && b.discountValue > 100) { showToast(label + ': giảm % không được vượt quá 100!', 'error'); return false; }
+            if (b.discountType === 'FIXED' && b.discountValue > b.price) { showToast(label + ': giảm cố định không được vượt quá giá bán!', 'error'); return false; }
+        }
         return true;
     }
     async function saveVariant() {
         const { productId, variantId } = variantModalState;
         const b = baseFromModal();
         if (!validateVariantRow(b, 'Biến thể')) return;
+        if (discountMode === 'VOUCHER' && !b.voucherId) { showToast('Chọn một mã ITEM để gắn!', 'error'); return; }
         const res = await fetch(variantId ? API + '/admin/product/variant/' + variantId : API + '/admin/product/' + productId + '/variant', { method: variantId ? 'PUT' : 'POST', headers: authHeaders, body: JSON.stringify(b) });
         if (res.ok) { showToast('Lưu biến thể thành công', 'success'); variantModal.hide(); await loadVariants(productId); refreshStock(); }
         else showToast(await errText(res), 'error');
@@ -793,16 +839,17 @@
         products.forEach(p => { const el = document.getElementById('stock-' + p.id); if (el) el.innerText = stockMap[p.id] || 0; });
     }
 
-    /* ===== QUICK-ADD v2 ===== */
+    /* quick-add v2 */
     function lockMainFields(on) {
         ['comboColor', 'comboString', 'comboTension', 'comboGrip'].forEach(id => document.getElementById(id).classList.toggle('combo-locked', on));
         ['vPrice', 'vStock', 'vDiscValue'].forEach(id => document.getElementById(id).disabled = on);
-        ['vDiscType', 'vStatus'].forEach(id => {
+        ['vDiscType', 'vStatus', 'vVoucher'].forEach(id => {
             const sel = document.getElementById(id);
             sel.disabled = on;
             const wrap = sel.previousSibling;
             if (wrap && wrap._sel) wrap.classList.toggle('field-locked', on);
         });
+        document.querySelectorAll('input[name="dmode"]').forEach(r => r.disabled = on);
         document.getElementById('saveVariantBtn').style.display = on ? 'none' : '';
     }
     async function setQuickMode(on) {
@@ -814,12 +861,25 @@
                 return;
             }
             quickBaseSpecs = specs;
+            quickVoucherId = discountMode === 'VOUCHER' ? (Number(document.getElementById('vVoucher').value) || null) : null;
+            if (discountMode === 'VOUCHER' && !quickVoucherId) {
+                showToast('Chọn mã ITEM trước khi bật thêm nhanh ở chế độ gắn mã!', 'error');
+                document.getElementById('quickToggle').checked = false;
+                return;
+            }
             document.getElementById('qPrice').value = document.getElementById('vPrice').value;
             document.getElementById('qStock').value = document.getElementById('vStock').value;
-            document.getElementById('qDiscType').value = document.getElementById('vDiscType').value;
-            document.getElementById('qDiscValue').disabled = !document.getElementById('vDiscType').value;
-            document.getElementById('qDiscValue').value = document.getElementById('vDiscValue').value;
+            document.getElementById('qDiscType').value = quickVoucherId ? '' : document.getElementById('vDiscType').value;
+            document.getElementById('qDiscValue').disabled = quickVoucherId ? true : !document.getElementById('vDiscType').value;
+            document.getElementById('qDiscValue').value = quickVoucherId ? '' : document.getElementById('vDiscValue').value;
             document.getElementById('qStatus').value = document.getElementById('vStatus').value;
+            document.getElementById('qDiscTypeCol').style.display = quickVoucherId ? 'none' : '';
+            document.getElementById('qDiscValueCol').style.display = quickVoucherId ? 'none' : '';
+            document.getElementById('qVoucherCol').style.display = quickVoucherId ? '' : 'none';
+            if (quickVoucherId) {
+                const vo = itemVouchers.find(x => x.id === quickVoucherId);
+                document.getElementById('qVoucherLabel').value = vo ? vo.code : ('#' + quickVoucherId);
+            }
             refreshGlassSelect(document.getElementById('qDiscType'));
             refreshGlassSelect(document.getElementById('qStatus'));
             syncQuickStock();
@@ -882,11 +942,11 @@
             </div>`;
     }
     function readQuickBase() {
-        const discType = document.getElementById('qDiscType').value || null;
+        const discType = quickVoucherId ? null : (document.getElementById('qDiscType').value || null);
         const incoming = document.getElementById('qStatus').value === 'INCOMING';
         return { price: parseMoney(document.getElementById('qPrice').value), stockQuantity: incoming ? 0 : Number(document.getElementById('qStock').value || 0),
-            discountType: discType, discountValue: discType === 'PERCENT' ? Number(document.getElementById('qDiscValue').value) : parseMoney(document.getElementById('qDiscValue').value),
-            status: incoming ? 'INCOMING' : null };
+            discountType: discType, discountValue: discType === 'PERCENT' ? Number(document.getElementById('qDiscValue').value) : (discType ? parseMoney(document.getElementById('qDiscValue').value) : null),
+            voucherId: quickVoucherId, status: incoming ? 'INCOMING' : null };
     }
     function rebuildPreview() {
         if (!quickMode) return;
@@ -944,8 +1004,8 @@
                     <td><select class="form-select form-select-sm qspec" onchange="rowEditSpec(${r._id}, 'stringType', this.value)">${opt('STRING', r.stringType)}</select></td>
                     <td><select class="form-select form-select-sm qspec" onchange="rowEditSpec(${r._id}, 'tension', this.value)">${opt('TENSION', r.tension)}</select></td>
                     <td><select class="form-select form-select-sm qspec" onchange="rowEditSpec(${r._id}, 'weightGrip', this.value)">${opt('GRIP', r.weightGrip)}</select></td>
-                    <td><input type="text" inputmode="decimal" class="form-control form-control-sm" style="min-width:90px" value="${isNaN(r.price) ? '' : r.price}" onchange="rowEditNum(${r._id}, 'price', this.value)"></td>
-                    <td><input type="number" min="0" max="1000000" class="form-control form-control-sm" style="width:80px" value="${r.stockQuantity}" ${incoming ? 'disabled' : ''} onchange="rowEditNum(${r._id}, 'stockQuantity', this.value)"></td>
+                    <td><input type="text" inputmode="decimal" class="form-control form-control-sm" style="min-width:90px" value="${isNaN(r.price) ? '' : r.price}" oninput="rowEditNum(${r._id}, 'price', this.value)"></td>
+                    <td><input type="number" min="0" max="1000000" class="form-control form-control-sm" style="width:80px" value="${r.stockQuantity}" ${incoming ? 'disabled' : ''} oninput="rowEditNum(${r._id}, 'stockQuantity', this.value)"></td>
                     <td id="dup-${r._id}"></td>
                     <td><button type="button" class="btn btn-icon icon-danger" style="width:28px;height:28px" title="Bỏ hàng này" onclick="removeQuickRow(${r._id})"><i class="bi bi-x-lg"></i></button></td>
                 </tr>`).join('')}</tbody></table></div>`;
@@ -968,15 +1028,8 @@
         counts.innerHTML = `Sẽ tạo <b style="color:#4ade80">${create}</b> • bỏ qua <b style="color:#f87171">${skip}</b> trùng • trần ${QUICK_CAP}`;
         btn.disabled = create === 0 || quickOver;
     }
-    function rowEditSpec(id, field, value) {
-        const r = quickRows.find(x => x._id === id); if (!r) return;
-        r[field] = value; refreshPreviewMeta();
-    }
-    function rowEditNum(id, field, raw) {
-        const r = quickRows.find(x => x._id === id); if (!r) return;
-        r[field] = field === 'price' ? parseMoney(raw) : Number(raw);
-        refreshPreviewMeta();
-    }
+    function rowEditSpec(id, field, value) { const r = quickRows.find(x => x._id === id); if (!r) return; r[field] = value; refreshPreviewMeta(); }
+    function rowEditNum(id, field, raw) { const r = quickRows.find(x => x._id === id); if (!r) return; r[field] = field === 'price' ? parseMoney(raw) : Number(raw); refreshPreviewMeta(); }
     function removeQuickRow(id) {
         const r = quickRows.find(x => x._id === id); if (!r) return;
         quickRemoved.add(r.key);
@@ -988,19 +1041,21 @@
         const base = readQuickBase();
         if (isNaN(base.price) || base.price <= 0) { showToast('Giá bán gốc không hợp lệ!', 'error'); return; }
         if (!Number.isInteger(base.stockQuantity) || base.stockQuantity < 0 || base.stockQuantity > 1000000) { showToast('Tồn kho gốc không hợp lệ!', 'error'); return; }
-        if (base.discountType && (isNaN(base.discountValue) || base.discountValue < 0)) { showToast('Giá trị giảm không hợp lệ!', 'error'); return; }
-        if (base.discountType === 'PERCENT' && base.discountValue > 100) { showToast('Giảm % không được vượt quá 100!', 'error'); return; }
+        if (!base.voucherId) {
+            if (base.discountType && (isNaN(base.discountValue) || base.discountValue < 0)) { showToast('Giá trị giảm không hợp lệ!', 'error'); return; }
+            if (base.discountType === 'PERCENT' && base.discountValue > 100) { showToast('Giảm % không được vượt quá 100!', 'error'); return; }
+        }
         computeDups();
         const rows = quickRows.filter(r => !r.dup);
         if (!rows.length) { showToast('Không có hàng mới nào để tạo!', 'error'); return; }
         for (let i = 0; i < rows.length; i++) {
             const r = rows[i];
-            const payload = { color: r.color, stringType: r.stringType, tension: r.tension, weightGrip: r.weightGrip, price: r.price, stockQuantity: base.status === 'INCOMING' ? 0 : r.stockQuantity, discountType: base.discountType, discountValue: base.discountType ? base.discountValue : null, status: base.status };
+            const payload = { color: r.color, stringType: r.stringType, tension: r.tension, weightGrip: r.weightGrip, price: r.price, stockQuantity: base.status === 'INCOMING' ? 0 : r.stockQuantity, discountType: base.voucherId ? null : base.discountType, discountValue: base.voucherId ? null : (base.discountType ? base.discountValue : null), voucherId: base.voucherId, status: base.status };
             if (!validateVariantRow(payload, 'Hàng ' + (i + 1))) return;
         }
         const skip = quickRows.length - rows.length;
         if (!await askConfirm(`Tạo ${rows.length} biến thể mới` + (skip ? ` (bỏ qua ${skip} hàng trùng)` : '') + '?', { text: 'Tạo', tone: 'add' })) return;
-        const payload = rows.map(r => ({ color: r.color, stringType: r.stringType, tension: r.tension, weightGrip: r.weightGrip, price: r.price, stockQuantity: base.status === 'INCOMING' ? 0 : r.stockQuantity, discountType: base.discountType, discountValue: base.discountType ? base.discountValue : null, status: base.status }));
+        const payload = rows.map(r => ({ color: r.color, stringType: r.stringType, tension: r.tension, weightGrip: r.weightGrip, price: r.price, stockQuantity: base.status === 'INCOMING' ? 0 : r.stockQuantity, discountType: base.voucherId ? null : base.discountType, discountValue: base.voucherId ? null : (base.discountType ? base.discountValue : null), voucherId: base.voucherId, status: base.status }));
         const res = await fetch(API + '/admin/product/' + pid + '/variants/bulk-rows', { method: 'POST', headers: authHeaders, body: JSON.stringify({ rows: payload }) });
         if (res.ok) {
             const j = await res.json();
@@ -1011,7 +1066,7 @@
         } else showToast(await errText(res), 'error');
     }
 
-    ['sortSelect', 'vDiscType', 'vStatus', 'qDiscType', 'qStatus', 'fColor', 'fString', 'fTension', 'fGrip'].forEach(id => upgradeSelect(document.getElementById(id)));
+    ['sortSelect', 'vDiscType', 'vStatus', 'vVoucher', 'qDiscType', 'qStatus', 'fColor', 'fString', 'fTension', 'fGrip'].forEach(id => upgradeSelect(document.getElementById(id)));
     load();
 </script>
 </body>
